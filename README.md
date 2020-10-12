@@ -19,11 +19,12 @@ A ESP8266-based remote controller for MFJ magnetic loops.
 
 ## Usage
 
-By default, the software uses DHCP to get an IP address. Simply to its assigned IP address in a Web browser and click on the desired tuning direction buttons; releasing the associated button results in tuning stop. Note that you're looking for maximum signal/noise for the initial pass at tuning; the eventual auto-tune feature will perform fine tuning for minimal SWR.
+By default, the software uses DHCP to get an IP address. Simply go to its assigned IP address on port 80 in a Web browser and click on the desired tuning direction buttons; releasing the associated button results in tuning stop. Note that you're looking for maximum signal/noise for the initial pass at tuning; the eventual auto-tune feature will perform fine tuning for minimal SWR.
 
 ## To Do
 
 * Auto-tuning
+* SSL support?
 * PCB combining all hardware and eliminating loose wires
 
 ## License
