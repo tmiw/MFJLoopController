@@ -12,17 +12,8 @@
 #define TUNE_DOWN_PIN D5
 #define ADC_INTERRUPT_PIN D6
 
-// Maximum ADC value for reverse power to trigger transition to slow tuning (TBD)
-//#define FAST_TUNE_MAX_ADC 512
-
-// ADC offsets for fwd/reverse (TBD)
-#define ADC_FWD_OFFSET 625
-#define ADC_REV_MAX_RAW 618
-#define ADC_REV_MAX_PO 1.25
-#define ADC_REV_OFFSET 566
-
 // ADC gain
-#define ADC_GAIN GAIN_EIGHT
+#define ADC_GAIN GAIN_ONE
 
 // ADC channels
 #define ADC_FWD_CH 0
