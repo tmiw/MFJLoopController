@@ -3,15 +3,17 @@
 #include "WebServerController.h"
 #include "CapacitorController.h"
 #include "PowerMonitor.h"
+#include "AutoTuneController.h"
 #include "config.h"
 
 static const char TEXT_PLAIN[] PROGMEM = "text/plain";
 static const char TEXT_JSON[] PROGMEM = "text/json";
 
-WebServerController::WebServerController(CapacitorController* pCapacitorController, PowerMonitor* pPowerMonitor)
+WebServerController::WebServerController(CapacitorController* pCapacitorController, PowerMonitor* pPowerMonitor, AutoTuneController* pAutoTuneController)
 : server_(80)
 , pCapacitorController_(pCapacitorController)
 , pPowerMonitor_(pPowerMonitor)
+, pAutoTuneController_(pAutoTuneController)
 {
   // empty
 }
@@ -28,7 +30,7 @@ void WebServerController::setup()
   }
   
   server_.on(F("/manual_tune"), [&]() { handleManualTune_(); });
-  //server_.on("/autotune", handleAutoTune);
+  server_.on(F("/autotune"), [&]() { handleAutoTune_(); });
   server_.on(F("/status"), [&]() { handleStatus_(); });
   server_.onNotFound([&]() { handleNotFound_(); });
   server_.begin();
@@ -141,6 +143,51 @@ void WebServerController::handleManualTune_()
   server_.send(200, FPSTR(TEXT_JSON), F("{ 'result': 'success' }"));
 }
 
+void WebServerController::handleAutoTune_()
+{
+  if (!server_.hasArg(F("enable")))
+  {
+    replyBadRequest_(F("Required: enable. + direction if enable == true"));
+    return;
+  }
+  
+  String enable = server_.arg(F("enable"));
+  
+  if (enable == F("true"))
+  {
+    if (!server_.hasArg(F("direction")))
+    {
+      replyBadRequest_(F("Required: enable. + direction if enable == true"));
+      return;
+    }
+
+    String direction = server_.arg(F("direction"));
+
+    AutoTuneController::Direction autoTuneDirection = AutoTuneController::NONE;   
+    if (direction == F("down"))
+    {
+      autoTuneDirection = AutoTuneController::DOWN;
+    }
+    else if (direction == F("up"))
+    {
+      autoTuneDirection = AutoTuneController::UP;
+    }
+    else
+    {
+      replyBadRequest_(F("Invalid: direction (down, up)."));
+      return;
+    }
+    
+    pAutoTuneController_->beginTune(autoTuneDirection);
+  } 
+  else 
+  {
+    pAutoTuneController_->endTune();
+  }
+
+  server_.send(200, FPSTR(TEXT_JSON), F("{ 'result': 'success' }"));
+}
+
 void WebServerController::handleStatus_()
 {
   server_.send(200, FPSTR(TEXT_JSON), 
@@ -151,7 +198,9 @@ void WebServerController::handleStatus_()
               "  \"rev_power_adc\": " + String(pPowerMonitor_->getReversePowerADC()) + ", "   
               "  \"vswr\": " + String(pPowerMonitor_->getVSWR()) + ", "   
               "  \"capacitor_speed\": " + String(pCapacitorController_->getSpeed()) + ", "
-              "  \"capacitor_direction\": " + String(pCapacitorController_->getDirection()) + "}");
+              "  \"capacitor_direction\": " + String(pCapacitorController_->getDirection()) + ","
+              "  \"autotune_state\": " + String(pAutoTuneController_->getState()) + ","
+              "  \"autotune_direction\": " + String(pAutoTuneController_->getDirection()) + "}");
 }
 
 //void WebServerController::handleAutotune_() { }

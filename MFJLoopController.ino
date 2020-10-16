@@ -5,11 +5,13 @@
 #include "WebServerController.h"
 #include "CapacitorController.h"
 #include "PowerMonitor.h"
+#include "AutoTuneController.h"
 #include "config.h"
 
 CapacitorController capController;
 PowerMonitor powerMonitor;
-WebServerController webServerController(&capController, &powerMonitor);
+AutoTuneController autoTuneController(&capController, &powerMonitor);
+WebServerController webServerController(&capController, &powerMonitor, &autoTuneController);
 
 void setup() {
   WiFi.mode(WIFI_STA);
@@ -23,6 +25,7 @@ void setup() {
   capController.setup();
   powerMonitor.setup();
   webServerController.setup();
+  autoTuneController.setup();
   
   // Set up OTA
   // Port defaults to 8266
@@ -84,7 +87,8 @@ void loop()
   // Handle OTA
   ArduinoOTA.handle();
 
+  autoTuneController.process();
   powerMonitor.process();
-  webServerController.process();
   capController.process();
+  webServerController.process();
 }

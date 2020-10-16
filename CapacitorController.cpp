@@ -78,7 +78,7 @@ void CapacitorController::enableTuningPin_()
     case UP:
       digitalWrite(TUNE_UP_PIN, HIGH);
       break;
-    case IDLE:
+    case NONE:
     default:
       break;
   }
@@ -88,4 +88,11 @@ void CapacitorController::disableTuningPins_()
 {
   digitalWrite(TUNE_UP_PIN, LOW);
   digitalWrite(TUNE_DOWN_PIN, LOW);
+}
+
+void CapacitorController::forceStop()
+{
+  disableTuningPins_();
+  speed_ = IDLE;
+  direction_ = NONE;
 }

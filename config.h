@@ -22,7 +22,7 @@
 // Slow tuning pulse time.
 #define TUNE_PULSE_TIME_MS 50
 
-// VSWR "tuning complete" threshold
-#define AUTOTUNE_COMPLETE_VSWR_THRESH ((double)1.5)
+// VSWR "tuning complete" threshold (above which we switch to slow tuning).
+#define FAST_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)2.0)
 
 #endif // CONFIG_H

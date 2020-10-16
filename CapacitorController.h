@@ -18,6 +18,8 @@ public:
   Speed getSpeed() const;
   virtual void process();
   virtual void setup();
+
+  void forceStop();
   
 private:
   enum { PULSE_TIME_MS = 50 };
