@@ -32,3 +32,11 @@
 *.exe
 *.out
 *.app
+
+# Include schematic libraries
+!schematic/*.lib
+
+# Exclude schematic backups and caches
+*.kicad_pcb-bak
+*.sch-bak
+schematic/fp-info-cache
