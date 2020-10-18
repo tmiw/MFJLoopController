@@ -40,44 +40,28 @@ void PowerMonitor::process()
   forwardPowerAdc_ = ads1015_.readADC_SingleEnded(ADC_FWD_CH);
   revPowerAdc_ = ads1015_.readADC_SingleEnded(ADC_REV_CH);
 
-  // Polynominal fitting @ degree 5 based on calculations at http://www.xuru.org/rt/PR.asp
-  // and the following data:
-  //
-  // FWD (ADC, W):
-  //   1738: 1
-  //   2850: 5
-  //   5104: 12
-  //   7159: 25
-  //   11468: 50
-  //   17148: 100
-  //   eq: y = 2.322509224e-18* x^5 - 9.260417149e-14*x^4 + 1.292824426e-9*x^3 - 7.500488825e-6*x^2 + 2.157426008e-2*x - 19.81881298
-  // REV (ADC, W):
-  //   1718: 1
-  //   3148: 5
-  //   4885: 12
-  //   7268: 25
-  //   11518: 50
-  //   17208: 100
-  //   eq: y = 4.096215909e-19 * x^5 - 1.432648908e-14 * x^4 + 1.583612334e-10 * x^3 - 3.682819754e-7 * x^2 + 2.508387335e-3 * x - 2.906746954
-  //
-  // Note: fwd and reverse use different equations due to slightly different readings (possibly
-  // due to slight differences in toroid winding). Autotune algorithm should not be impacted
-  // as it uses the lowest SWR regardless of what we calculate it to. You may also want to update 
-  // the following equations if you're using a different implementation of the SWR bridge.
-  forwardPower_ =
-     2.322509224e-18 * pow(forwardPowerAdc_, 5) -
-     9.260417149e-14 * pow(forwardPowerAdc_, 4) + 
-     1.292824426e-9 * pow(forwardPowerAdc_, 3) - 
-     7.500488825e-6 * pow(forwardPowerAdc_, 2) + 
-     2.157426008e-2 * forwardPowerAdc_ - 
-     19.81881298;
-  revPower_ = 
-     4.096215909e-19 * pow(revPowerAdc_, 5) - 
-     1.432648908e-14 * pow(revPowerAdc_, 4) + 
-     1.583612334e-10 * pow(revPowerAdc_, 3) - 
-     3.682819754e-7 * pow(revPowerAdc_, 2) + 
-     2.508387335e-3 * revPowerAdc_ - 
-     2.906746954;
+  // Truncate negative and other "low" ADC values to zero.
+  if (revPowerAdc_ < 0)
+  {
+    revPowerAdc_ = 0;
+  }
+  if (forwardPowerAdc_ < 0)
+  {
+    forwardPowerAdc_ = 0;
+  }
+  
+  forwardPower_ = fwdPowerFromAdc_(forwardPowerAdc_);
+  revPower_ = revPowerFromAdc_(revPowerAdc_);
+
+  // Truncate negative power values to zero.
+  if (revPower_ < 0.0)
+  {
+    revPower_ = 0.0;
+  }
+  if (forwardPower_ < 0.0)
+  {
+    forwardPower_ = 0.0;
+  }
   
   if (forwardPower_ > 0.0)
   {
@@ -87,6 +71,8 @@ void PowerMonitor::process()
   else
   {
     vswr_ = 0.0;
+    forwardPower_ = 0.0;
+    revPower_ = 0.0;
   }
 }
 
@@ -113,4 +99,62 @@ int16_t PowerMonitor::getReversePowerADC() const
 double PowerMonitor::getVSWR() const
 {
   return vswr_;
+}
+
+double PowerMonitor::fwdPowerFromAdc_(int16_t adc)
+{
+  // Truncate "low" ADC values to zero due to issues with below curve fitting.
+  if (adc < 500) return 0.0;
+  
+  // Polynominal fitting @ degree 5 based on calculations at http://www.xuru.org/rt/PR.asp
+  // and the following data:
+  //
+  //   1843 1
+  //   3187 5
+  //   4853 12
+  //   6632 25
+  //   10157 50
+  //   14900 100
+  //   eq: y = 3.377917497e-18 * x^5 - 1.18770898e-1 * x^4 + 1.46712663e-9*x^3 - 7.423572601e-6*x^2 + 1.913878053e-2*x - 16.94328854
+  //
+  // Note: fwd and reverse use different equations due to slightly different readings (possibly
+  // due to slight differences in toroid winding). Autotune algorithm should not be impacted
+  // as it uses the lowest SWR regardless of what we calculate it to. You may also want to update 
+  // the following equations if you're using a different implementation of the SWR bridge.
+  return abs(
+    3.377917497e-18 * pow(adc, 5) -
+    1.18770898e-13 * pow(adc, 4) + 
+    1.46712663e-9 * pow(adc, 3) - 
+    7.423572601e-6 * pow(adc, 2) + 
+    1.913878053e-2 * adc - 
+    16.94328854);
+}
+
+double PowerMonitor::revPowerFromAdc_(int16_t adc)
+{
+  // Truncate "low" ADC values to zero due to issues with below curve fitting.
+  if (adc < 500) return 0.0;
+  
+  // Polynominal fitting @ degree 5 based on calculations at http://www.xuru.org/rt/PR.asp
+  // and the following data:
+  //
+  //   1079 1
+  //   1288 5
+  //   1444 12
+  //   2046 25
+  //   3628 50
+  //   5910 100
+  //   eq: y = -9.967647711e-15 * x^5 + 1.403077787e-10 * x^4 - 7.101543076e-7*x^3 + 1.620120307e-3*x^2 - 1.662151832*x + 624.7554526
+  //
+  // Note: fwd and reverse use different equations due to slightly different readings (possibly
+  // due to slight differences in toroid winding). Autotune algorithm should not be impacted
+  // as it uses the lowest SWR regardless of what we calculate it to. You may also want to update 
+  // the following equations if you're using a different implementation of the SWR bridge.
+  return abs(
+    -9.967647711e-15 * pow(adc, 5) +
+    1.403077787e-10 * pow(adc, 4) -
+    7.101543076e-7 * pow(adc, 3) + 
+    1.620120307e-3 * pow(adc, 2) - 
+    1.662151832 * adc +
+    624.7554526);
 }

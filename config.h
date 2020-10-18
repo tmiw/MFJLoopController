@@ -3,8 +3,8 @@
 
 #include <ESP8266WiFi.h>
 
-#define STASSID "YOUR WIFI NETWORK HERE"
-#define STAPSK  "YOUR WIFI PASSWORD HERE"
+#define STASSID "***REMOVED***"
+#define STAPSK  "***REMOVED***"
 
 #define MDNS_NAME "mfj-loop"
 
@@ -16,8 +16,8 @@
 #define ADC_GAIN GAIN_ONE
 
 // ADC channels
-#define ADC_FWD_CH 0
-#define ADC_REV_CH 2
+#define ADC_FWD_CH 3
+#define ADC_REV_CH 1
 
 // Slow tuning pulse time.
 #define TUNE_PULSE_TIME_MS 50

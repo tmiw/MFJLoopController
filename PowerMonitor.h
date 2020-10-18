@@ -26,6 +26,9 @@ private:
   double revPower_;
   int16_t revPowerAdc_;
   double vswr_;
+
+  double fwdPowerFromAdc_(int16_t adc);
+  double revPowerFromAdc_(int16_t adc);
 };
 
 #endif // POWER_MONITOR_H
