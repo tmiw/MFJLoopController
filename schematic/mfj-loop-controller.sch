@@ -4,9 +4,9 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title ""
+Title "MFJ Wi-Fi Loop Controller"
 Date ""
-Rev ""
+Rev "1.0.1"
 Comp ""
 Comment1 ""
 Comment2 ""
@@ -765,7 +765,7 @@ L Connector:Conn_01x10_Female J4
 U 1 1 5FB62215
 P 4400 5700
 F 0 "J4" H 4428 5676 50  0000 L CNN
-F 1 "Conn_01x10_Female" H 4428 5585 50  0000 L CNN
+F 1 "Adafruit ADS1115" H 4428 5585 50  0000 L CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x10_P2.54mm_Vertical" H 4400 5700 50  0001 C CNN
 F 3 "~" H 4400 5700 50  0001 C CNN
 	1    4400 5700
