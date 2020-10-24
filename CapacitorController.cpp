@@ -57,9 +57,9 @@ void CapacitorController::process()
   {
     // Pulse tuning pin.
     enableTuningPin_();
-    delay(PULSE_TIME_MS);
+    delay(TUNE_PULSE_ON_TIME_MS);
     disableTuningPins_();
-    delay(PULSE_TIME_MS);
+    delay(TUNE_PULSE_OFF_TIME_MS);
   }
   else if (speed_ == FAST)
   {

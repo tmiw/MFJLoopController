@@ -41,14 +41,14 @@ void PowerMonitor::process()
   revPowerAdc_ = ads1015_.readADC_SingleEnded(ADC_REV_CH);
 
   // Truncate negative and other "low" ADC values to zero.
-  if (revPowerAdc_ < 0)
+  /*if (revPowerAdc_ < 0)
   {
     revPowerAdc_ = 0;
   }
   if (forwardPowerAdc_ < 0)
   {
     forwardPowerAdc_ = 0;
-  }
+  }*/
   
   forwardPower_ = fwdPowerFromAdc_(forwardPowerAdc_);
   revPower_ = revPowerFromAdc_(revPowerAdc_);

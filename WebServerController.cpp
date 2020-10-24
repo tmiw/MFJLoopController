@@ -192,11 +192,11 @@ void WebServerController::handleStatus_()
 {
   server_.send(200, FPSTR(TEXT_JSON), 
               "{ \"result\": \"success\", "
-              "  \"fwd_power\": " + String(pPowerMonitor_->getForwardPower()) + ", "
-              "  \"rev_power\": " + String(pPowerMonitor_->getReversePower()) + ", "
+              "  \"fwd_power\": " + String(pPowerMonitor_->getForwardPower(), 1) + ", "
+              "  \"rev_power\": " + String(pPowerMonitor_->getReversePower(), 1) + ", "
               "  \"fwd_power_adc\": " + String(pPowerMonitor_->getForwardPowerADC()) + ", "
               "  \"rev_power_adc\": " + String(pPowerMonitor_->getReversePowerADC()) + ", "   
-              "  \"vswr\": " + String(pPowerMonitor_->getVSWR()) + ", "   
+              "  \"vswr\": " + String(pPowerMonitor_->getVSWR(), 2) + ", "   
               "  \"capacitor_speed\": " + String(pCapacitorController_->getSpeed()) + ", "
               "  \"capacitor_direction\": " + String(pCapacitorController_->getDirection()) + ","
               "  \"autotune_state\": " + String(pAutoTuneController_->getState()) + ","
