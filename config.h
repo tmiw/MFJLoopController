@@ -16,8 +16,8 @@
 #define ADC_GAIN GAIN_ONE
 
 // ADC channels
-#define ADC_FWD_CH 3
-#define ADC_REV_CH 1
+#define ADC_FWD_CH 0
+#define ADC_REV_CH 2
 
 // Slow tuning pulse time.
 #define TUNE_PULSE_TIME_MS 50
