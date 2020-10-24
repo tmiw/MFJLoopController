@@ -88,6 +88,32 @@
     </div>
 </body>
 <script language="javascript">
+    slowTuneUp = function() {
+        currentReq = $.ajax(
+            {
+                url: "/manual_tune?direction=up&speed=slow&enable=true",
+                dataType: 'json',
+                complete: function() { currentReqTO = setTimeout(slowTuneUp, 100); }
+            });
+    };
+    
+    slowTuneDown = function() {
+        currentReq = $.ajax(
+            {
+                url: "/manual_tune?direction=down&speed=slow&enable=true",
+                dataType: 'json',
+                complete: function() { currentReqTO = setTimeout(slowTuneDown, 100); }
+            });
+    };
+    
+    abortCurrentReq = function() {
+        if (currentReq) currentReq.abort();
+        if (currentReqTO) clearTimeout(currentReqTO);    
+    };
+    
+    currentReq = null;
+    currentReqTO = null;
+    
     function updateStatus() {
         $.ajax("/status").done(function(xhr) {
             var fwd_power = xhr.fwd_power;
@@ -184,16 +210,20 @@
     $(document).ready(function () {
         // Initialize button actions.
         $("#slow-up").mousedown(function() {
-           $.ajax("/manual_tune?direction=up&speed=slow&enable=true");
+            abortCurrentReq();
+            slowTuneUp();
         });
         $("#slow-up").mouseup(function() {
-           $.ajax("/manual_tune?enable=false");
+            abortCurrentReq();
+            $.ajax("/manual_tune?enable=false");
         });
         $("#slow-down").mousedown(function() {
-           $.ajax("/manual_tune?direction=down&speed=slow&enable=true");
+            abortCurrentReq();
+            slowTuneDown();
         });
         $("#slow-down").mouseup(function() {
-           $.ajax("/manual_tune?enable=false");
+            abortCurrentReq();
+            $.ajax("/manual_tune?enable=false");
         });
         $("#fast-up").mousedown(function() {
            $.ajax("/manual_tune?direction=up&speed=fast&enable=true");

@@ -60,6 +60,10 @@ void CapacitorController::process()
     delay(TUNE_PULSE_ON_TIME_MS);
     disableTuningPins_();
     delay(TUNE_PULSE_OFF_TIME_MS);
+
+    // Auto-disable slow tuning and wait for next client request.
+    speed_ = IDLE;
+    direction_ = NONE;
   }
   else if (speed_ == FAST)
   {
