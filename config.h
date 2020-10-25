@@ -21,7 +21,7 @@
 #define ADC_REV_CH 2
 
 // Slow tuning pulse time.
-#define TUNE_PULSE_OFF_TIME_MS 80
+#define TUNE_PULSE_OFF_TIME_MS 100
 #define TUNE_PULSE_ON_TIME_MS 20
 
 // VSWR "tuning complete" threshold (above which we switch to slow tuning).

@@ -93,7 +93,9 @@
             {
                 url: "/manual_tune?direction=up&speed=slow&enable=true",
                 dataType: 'json',
-                complete: function() { currentReqTO = setTimeout(slowTuneUp, 100); }
+                complete: function() { 
+                    if ($("#slow-up").hasClass("btn-success")) currentReqTO = setTimeout(slowTuneUp, 100); 
+                }
             });
     };
     
@@ -102,13 +104,20 @@
             {
                 url: "/manual_tune?direction=down&speed=slow&enable=true",
                 dataType: 'json',
-                complete: function() { currentReqTO = setTimeout(slowTuneDown, 100); }
+                complete: function() { 
+                    if ($("#slow-down").hasClass("btn-success")) currentReqTO = setTimeout(slowTuneDown, 100); 
+                }
             });
     };
     
     abortCurrentReq = function() {
         if (currentReq) currentReq.abort();
-        if (currentReqTO) clearTimeout(currentReqTO);    
+        if (currentReqTO) clearTimeout(currentReqTO);
+        
+        $("#slow-down").removeClass("btn-success");
+        $("#slow-up").removeClass("btn-success");
+        $("#slow-down").addClass("btn-primary");
+        $("#slow-up").addClass("btn-primary");    
     };
     
     currentReq = null;
@@ -136,12 +145,8 @@
             // Set button states.
             $("#fast-down").removeClass("btn-success");
             $("#fast-up").removeClass("btn-success");
-            $("#slow-down").removeClass("btn-success");
-            $("#slow-up").removeClass("btn-success");
             $("#fast-down").addClass("btn-primary");
             $("#fast-up").addClass("btn-primary");
-            $("#slow-down").addClass("btn-primary");
-            $("#slow-up").addClass("btn-primary");
             $("#at-down").removeClass("btn-success");
             $("#at-up").removeClass("btn-success");
             $("#at-down").removeClass("btn-warning");
@@ -159,19 +164,6 @@
                 {
                     $("#fast-down").removeClass("btn-primary");
                     $("#fast-down").addClass("btn-success");
-                }
-            }
-            else if (capacitor_speed == "2")
-            {
-                if (capacitor_direction == "2")
-                {
-                    $("#slow-up").removeClass("btn-primary");
-                    $("#slow-up").addClass("btn-success");
-                }
-                else if (capacitor_direction == "1")
-                {
-                    $("#slow-down").removeClass("btn-primary");
-                    $("#slow-down").addClass("btn-success");
                 }
             }
         
@@ -211,19 +203,23 @@
         // Initialize button actions.
         $("#slow-up").mousedown(function() {
             abortCurrentReq();
+            $("#slow-up").removeClass("btn-primary");
+            $("#slow-up").addClass("btn-success");
             slowTuneUp();
         });
         $("#slow-up").mouseup(function() {
-            abortCurrentReq();
-            $.ajax("/manual_tune?enable=false");
+            $("#slow-up").addClass("btn-primary");
+            $("#slow-up").removeClass("btn-success");
         });
         $("#slow-down").mousedown(function() {
             abortCurrentReq();
+            $("#slow-down").removeClass("btn-primary");
+            $("#slow-down").addClass("btn-success");
             slowTuneDown();
         });
         $("#slow-down").mouseup(function() {
-            abortCurrentReq();
-            $.ajax("/manual_tune?enable=false");
+            $("#slow-down").addClass("btn-primary");
+            $("#slow-down").removeClass("btn-success");
         });
         $("#fast-up").mousedown(function() {
            $.ajax("/manual_tune?direction=up&speed=fast&enable=true");
