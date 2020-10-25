@@ -11,6 +11,7 @@
 #define TUNE_UP_PIN D0
 #define TUNE_DOWN_PIN D5
 #define ADC_INTERRUPT_PIN D6
+#define TUNE_LED_PIN D4
 
 // ADC gain
 #define ADC_GAIN GAIN_ONE

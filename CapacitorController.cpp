@@ -18,6 +18,7 @@ void CapacitorController::setup()
   // Initialize both tuning pins to low.
   pinMode(TUNE_UP_PIN, OUTPUT);
   pinMode(TUNE_DOWN_PIN, OUTPUT);
+  pinMode(TUNE_LED_PIN, OUTPUT);
   disableTuningPins_();
 }
 
@@ -27,7 +28,8 @@ void CapacitorController::setDirection(Direction dir)
   // to guarantee that the system doesn't short out.
   digitalWrite(TUNE_UP_PIN, LOW);
   digitalWrite(TUNE_DOWN_PIN, LOW);
-
+  digitalWrite(TUNE_LED_PIN, HIGH);
+  
   // Set direction. Next call to process() will set the needed pin to high.
   direction_ = dir;
 }
@@ -84,14 +86,17 @@ void CapacitorController::enableTuningPin_()
       break;
     case NONE:
     default:
-      break;
+      return;
   }
+
+  digitalWrite(TUNE_LED_PIN, LOW);
 }
 
 void CapacitorController::disableTuningPins_()
 {
   digitalWrite(TUNE_UP_PIN, LOW);
   digitalWrite(TUNE_DOWN_PIN, LOW);
+  digitalWrite(TUNE_LED_PIN, HIGH);
 }
 
 void CapacitorController::forceStop()
