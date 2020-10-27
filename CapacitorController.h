@@ -22,9 +22,7 @@ public:
 
   void forceStop();
   
-private:
-  enum { PULSE_TIME_MS = 50 };
-  
+private:  
   Direction direction_;  
   Direction prevDirection_;
   Speed speed_;

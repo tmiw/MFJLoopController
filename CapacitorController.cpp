@@ -65,13 +65,13 @@ void CapacitorController::process()
   {
     // If we're changing directions, we should pulse the pin for significantly longer
     // to overcome any resistance/inertia the capacitor puts out.
-    if (prevDirection_ != direction_ && prevDirection_ != NONE)
+    /*if (prevDirection_ != direction_ && prevDirection_ != NONE)
     {
       enableTuningPin_();
       delay(TUNE_INERTIA_PULSE_ON_TIME_MS);
       disableTuningPins_();
       delay(TUNE_PULSE_OFF_TIME_MS);
-    }
+    }*/
     prevDirection_ = direction_;
     
     // Pulse tuning pin.

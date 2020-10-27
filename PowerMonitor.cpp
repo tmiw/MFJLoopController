@@ -37,17 +37,35 @@ void PowerMonitor::setup()
 
 void PowerMonitor::process()
 {
-  forwardPowerAdc_ = ads1015_.readADC_SingleEnded(ADC_FWD_CH);
-  revPowerAdc_ = ads1015_.readADC_SingleEnded(ADC_REV_CH);
-
-  // Truncate negative and other "low" ADC values to zero.
-  /*if (revPowerAdc_ < 0)
+  uint32_t tmpFwdAdc = 0;
+  uint32_t tmpRevAdc = 0;
+  
+  for (auto i = 0; i < 16; i++)
   {
-    revPowerAdc_ = 0;
+      tmpFwdAdc += ads1015_.readADC_Continuous(ADC_FWD_CH);
+      tmpRevAdc += ads1015_.readADC_Continuous(ADC_REV_CH);
   }
-  if (forwardPowerAdc_ < 0)
+
+  forwardPowerAdc_ = tmpFwdAdc / 16;
+  revPowerAdc_ = tmpRevAdc / 16;
+  
+  // IIR filtration for each ADC value.
+  /*if (forwardPowerAdc_ == 0)
   {
-    forwardPowerAdc_ = 0;
+    c = tmpAdcFwd;
+  }
+  else
+  {
+    forwardPowerAdc_ += (tmpAdcFwd - forwardPowerAdc_) / 16;
+  }
+
+  if (revPowerAdc_ == 0)
+  {
+    revPowerAdc_ = tmpAdcRev;
+  }
+  else
+  {
+    revPowerAdc_ += (tmpAdcRev - revPowerAdc_) / 16;
   }*/
   
   forwardPower_ = powerFromAdc_(forwardPowerAdc_);
@@ -105,44 +123,42 @@ double PowerMonitor::powerFromAdc_(int16_t adc)
 {
   // Truncate "low" ADC values to zero due to issues with below curve fitting.
   if (adc < 500) return 0.0;
-
-  adc *= 0.37;
   
-  // Polynominal fitting @ degree 5 based on calculations at http://www.xuru.org/rt/PR.asp
+  // Polynominal fitting @ degree 5 based on calculations at https://arachnoid.com/polysolve/
   // and the following data:
   //
-  //   3 0
-  //   880 5
-  //   1287 10
-  //   1556 15
-  //   1792 20
-  //   2032 25
-  //   2328 30
-  //   2560 35
-  //   2807 40
-  //   3039 45
-  //   3271 50
-  //   3442 55
-  //   3615 60
-  //   3793 65
-  //   3965 70
-  //   4133 75
-  //   4315 80
-  //   4425 85
-  //   4587 90
-  //   4731 95
-  //   4869 100
-  //   eq: y = -1.02680951e-16 x^5 + 1.48581471e-12 x^4 - 7.729336489e-9 x^33 + 2.0030701e-5 x^2 - 7.576202086e-3 x + 6.452445678e-2
+  //   12 0
+  //   2361 5
+  //   3915 10
+  //   4595 15
+  //   5378 20
+  //   6071 25
+  //   6764 30
+  //   7533 35
+  //   8221 40
+  //   8980 45
+  //   9591 50
+  //   10095 55
+  //   10606 60
+  //   11101 65
+  //   11604 70
+  //   12109 75
+  //   12518 80
+  //   12931 85
+  //   13339 90
+  //   13830 95
+  //   14241 100
+  //   eq: y = -4.0017073502796845e-019 x^5 + 1.6638800114614116e-014 x^4 - 2.4968122806285582e-010 x^3 + 1.9615755904512023e-006 x^2 - 1.8702860105643696e-003 x + 1.7639189610096823e-001
   //
   // Note: fwd and reverse use different equations due to slightly different readings (possibly
   // due to slight differences in toroid winding). Autotune algorithm should not be impacted
   // as it uses the lowest SWR regardless of what we calculate it to. You may also want to update 
   // the following equation if you're using a different implementation of the SWR bridge.
   return abs(
-    -1.02680951e-16 * pow(adc, 5) +
-    1.48581471e-12 * pow(adc, 4) - 
-    7.729336489e-9 * pow(adc, 3) + 
-    2.0030701e-5 * pow(adc, 2) - 
-    7.576202086e-3 * adc + 
-    6.452445678e-2);
+    -4.0017073502796845e-019 * pow(adc, 5) +
+    1.6638800114614116e-014 * pow(adc, 4) - 
+    2.4968122806285582e-010 * pow(adc, 3) + 
+    1.9615755904512023e-006 * pow(adc, 2) - 
+    1.8702860105643696e-003 * adc + 
+    1.7639189610096823e-001);
 }

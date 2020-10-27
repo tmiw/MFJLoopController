@@ -46,6 +46,8 @@ void AutoTuneController::process()
     endTune();
     return;
   }
+
+  double swr = pPowerMonitor_->getVSWR();
   
   switch(currentState_)
   {
@@ -53,15 +55,16 @@ void AutoTuneController::process()
       pCapacitorController_->setDirection(autoTuneDirection_ == DOWN ? CapacitorController::DOWN : CapacitorController::UP);
       pCapacitorController_->setSpeed(CapacitorController::FAST);
       currentState_ = FAST_TUNE;
+      minSWRVal_ = DBL_MAX;
       break;
     case FAST_TUNE:
-      if (pPowerMonitor_->getVSWR() <= minSWRVal_)
+      if (swr <= minSWRVal_)
       {
-        minSWRVal_ = pPowerMonitor_->getVSWR();
+        minSWRVal_ = swr;
       }
       else
       {
-        if (pPowerMonitor_->getVSWR() >= FAST_AUTOTUNE_COMPLETE_VSWR_THRESH)
+        if (swr > minSWRVal_)
         {
           pCapacitorController_->forceStop(); // to reduce the amount of distance to cover in slow mode.
           currentState_ = TOP_UP;
@@ -72,14 +75,14 @@ void AutoTuneController::process()
     case TOP_UP:
       pCapacitorController_->setDirection(autoTuneDirection_ == DOWN ? CapacitorController::UP : CapacitorController::DOWN);
       pCapacitorController_->setSpeed(CapacitorController::SLOW);
-      if (minSWRVal_ < pPowerMonitor_->getVSWR())
+      if (minSWRVal_ < swr)
       {
         // Autotune complete.
         endTune();
       }
       else
       {
-        minSWRVal_ = pPowerMonitor_->getVSWR();
+        minSWRVal_ = swr;
       }
       break;
     case IDLE:
