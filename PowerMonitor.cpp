@@ -37,36 +37,12 @@ void PowerMonitor::setup()
 
 void PowerMonitor::process()
 {
-  uint32_t tmpFwdAdc = 0;
-  uint32_t tmpRevAdc = 0;
-  
-  for (auto i = 0; i < 16; i++)
-  {
-      tmpFwdAdc += ads1015_.readADC_Continuous(ADC_FWD_CH);
-      tmpRevAdc += ads1015_.readADC_Continuous(ADC_REV_CH);
-  }
+  int16_t tmpFwdAdc = ads1015_.readADC_Continuous(ADC_FWD_CH);
+  int16_t tmpRevAdc = ads1015_.readADC_Continuous(ADC_REV_CH);
 
-  forwardPowerAdc_ = tmpFwdAdc / 16;
-  revPowerAdc_ = tmpRevAdc / 16;
-  
   // IIR filtration for each ADC value.
-  /*if (forwardPowerAdc_ == 0)
-  {
-    c = tmpAdcFwd;
-  }
-  else
-  {
-    forwardPowerAdc_ += (tmpAdcFwd - forwardPowerAdc_) / 16;
-  }
-
-  if (revPowerAdc_ == 0)
-  {
-    revPowerAdc_ = tmpAdcRev;
-  }
-  else
-  {
-    revPowerAdc_ += (tmpAdcRev - revPowerAdc_) / 16;
-  }*/
+  forwardPowerAdc_ = 0.1*forwardPowerAdc_ + (1.0-0.1)*tmpFwdAdc;
+  revPowerAdc_ = 0.1*revPowerAdc_ + (1.0-0.1)*tmpRevAdc;
   
   forwardPower_ = powerFromAdc_(forwardPowerAdc_);
   revPower_ = powerFromAdc_(revPowerAdc_);
@@ -83,8 +59,8 @@ void PowerMonitor::process()
   
   if (forwardPower_ > 0.0)
   {
-    double coeff = sqrt(revPower_ / forwardPower_);
-    vswr_ = (1 + coeff) / (1 - coeff);
+    double coeff = sqrt((double)revPowerAdc_ / (double)forwardPowerAdc_);
+    vswr_ = (1.0 + coeff) / (1.0 - coeff);
   }
   else
   {

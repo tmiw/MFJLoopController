@@ -47,7 +47,9 @@ void AutoTuneController::process()
     return;
   }
 
-  double swr = pPowerMonitor_->getVSWR();
+  // Truncate approximately all digits past the tenths place; too much variation in
+  // smaller portions of SWR to be useful for autotuning.
+  double swr = trunc(pPowerMonitor_->getVSWR() * 10) / 10;
   
   switch(currentState_)
   {
