@@ -24,6 +24,13 @@
 #define TUNE_PULSE_OFF_TIME_MS 100
 #define TUNE_PULSE_ON_TIME_MS 20
 
+// Length of initial "long" pulse when changing directions. This is needed
+// to overcome inertia/resistance in the capacitor prior to slow tuning.
+// Note: this long pulse is not initially performed on boot due to not knowing
+// which direction the antenna was moved during the last session. Having the
+// pulse be enabled could result in going very far off course.
+#define TUNE_INERTIA_PULSE_ON_TIME_MS 500
+
 // VSWR "tuning complete" threshold (above which we switch to slow tuning).
 #define FAST_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)2.0)
 

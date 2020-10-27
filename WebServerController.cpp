@@ -133,11 +133,20 @@ void WebServerController::handleManualTune_()
     
     pCapacitorController_->setDirection(capacitorDirection);
     pCapacitorController_->setSpeed(capacitorSpeed);
+    if (capacitorSpeed == CapacitorController::SLOW)
+    {
+      pCapacitorController_->onlyOnce(true);
+    }
+    else
+    {
+      pCapacitorController_->onlyOnce(false);
+    }
   } 
   else 
   {
     pCapacitorController_->setDirection(CapacitorController::NONE);
     pCapacitorController_->setSpeed(CapacitorController::IDLE);
+    pCapacitorController_->onlyOnce(false);
   }
 
   server_.send(200, FPSTR(TEXT_JSON), F("{ 'result': 'success' }"));

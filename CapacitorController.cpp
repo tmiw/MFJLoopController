@@ -4,6 +4,7 @@
 CapacitorController::CapacitorController()
 : direction_( NONE )
 , speed_( IDLE )
+, prevDirection_( NONE )
 {
   // empty
 }
@@ -49,6 +50,11 @@ CapacitorController::Speed CapacitorController::getSpeed() const
   return speed_;
 }
 
+void CapacitorController::onlyOnce(bool once)
+{
+  onlyOnce_ = once;
+}
+
 void CapacitorController::process()
 {
   if (speed_ == IDLE)
@@ -57,6 +63,17 @@ void CapacitorController::process()
   }
   else if (speed_ == SLOW)
   {
+    // If we're changing directions, we should pulse the pin for significantly longer
+    // to overcome any resistance/inertia the capacitor puts out.
+    if (prevDirection_ != direction_ && prevDirection_ != NONE)
+    {
+      enableTuningPin_();
+      delay(TUNE_INERTIA_PULSE_ON_TIME_MS);
+      disableTuningPins_();
+      delay(TUNE_PULSE_OFF_TIME_MS);
+    }
+    prevDirection_ = direction_;
+    
     // Pulse tuning pin.
     enableTuningPin_();
     delay(TUNE_PULSE_ON_TIME_MS);
@@ -64,13 +81,18 @@ void CapacitorController::process()
     delay(TUNE_PULSE_OFF_TIME_MS);
 
     // Auto-disable slow tuning and wait for next client request.
-    speed_ = IDLE;
-    direction_ = NONE;
+    if (onlyOnce_)
+    {
+      onlyOnce_ = false;
+      speed_ = IDLE;
+      direction_ = NONE;
+    }
   }
   else if (speed_ == FAST)
   {
     // Enable needed tuning pin.
     enableTuningPin_();
+    prevDirection_ = direction_;
   }
 }
 

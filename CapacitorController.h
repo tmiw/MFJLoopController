@@ -16,6 +16,7 @@ public:
   Direction getDirection() const;
   void setSpeed(Speed speed);
   Speed getSpeed() const;
+  void onlyOnce(bool once);
   virtual void process();
   virtual void setup();
 
@@ -25,7 +26,9 @@ private:
   enum { PULSE_TIME_MS = 50 };
   
   Direction direction_;  
+  Direction prevDirection_;
   Speed speed_;
+  bool onlyOnce_;
 
   void enableTuningPin_();
   void disableTuningPins_();
