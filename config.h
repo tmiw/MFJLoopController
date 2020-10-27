@@ -3,8 +3,8 @@
 
 #include <ESP8266WiFi.h>
 
-#define STASSID "***REMOVED***"
-#define STAPSK  "***REMOVED***"
+#define STASSID "YOUR SSID HERE"
+#define STAPSK  "YOUR PASSWORD HERE"
 
 #define MDNS_NAME "mfj-loop"
 
