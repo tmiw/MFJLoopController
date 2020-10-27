@@ -3,8 +3,9 @@
 
 #include <ESP8266WiFi.h>
 
-#define STASSID "YOUR SSID HERE"
-#define STAPSK  "YOUR PASSWORD HERE"
+// Define STASSID (your wireless SSID) and STAPSK (your network's password)
+// inside config-wifi.h. The below file is in .gitignore to prevent accidental check-in.
+#include "config-wifi.h"
 
 #define MDNS_NAME "mfj-loop"
 

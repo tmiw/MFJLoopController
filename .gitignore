@@ -40,3 +40,6 @@
 *.kicad_pcb-bak
 *.sch-bak
 schematic/fp-info-cache
+
+# Exclude private data
+config-wifi.h
