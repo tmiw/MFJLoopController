@@ -37,13 +37,12 @@ void PowerMonitor::setup()
 
 void PowerMonitor::process()
 {
-  int16_t tmpFwdAdc = ads1015_.readADC_Continuous(ADC_FWD_CH);
-  int16_t tmpRevAdc = ads1015_.readADC_Continuous(ADC_REV_CH);
+  int16_t tmpFwdAdc = ads1015_.readADC_SingleEnded(ADC_FWD_CH);
+  int16_t tmpRevAdc = ads1015_.readADC_SingleEnded(ADC_REV_CH);
 
-  // IIR filtration for each ADC value.
-  forwardPowerAdc_ = 0.1*forwardPowerAdc_ + (1.0-0.1)*tmpFwdAdc;
-  revPowerAdc_ = 0.1*revPowerAdc_ + (1.0-0.1)*tmpRevAdc;
-  
+  forwardPowerAdc_ = tmpFwdAdc;
+  revPowerAdc_ = tmpRevAdc;
+      
   forwardPower_ = powerFromAdc_(forwardPowerAdc_);
   revPower_ = powerFromAdc_(revPowerAdc_);
 
@@ -59,7 +58,7 @@ void PowerMonitor::process()
   
   if (forwardPower_ > 0.0)
   {
-    double coeff = sqrt((double)revPowerAdc_ / (double)forwardPowerAdc_);
+    double coeff = sqrt((double)revPower_ / (double)forwardPower_);
     vswr_ = (1.0 + coeff) / (1.0 - coeff);
   }
   else

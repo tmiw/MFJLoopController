@@ -87,8 +87,8 @@ void loop()
   // Handle OTA
   ArduinoOTA.handle();
 
-  autoTuneController.process();
-  powerMonitor.process();
   capController.process();
+  powerMonitor.process();
+  autoTuneController.process();
   webServerController.process();
 }

@@ -7,7 +7,7 @@ class CapacitorController : public ComponentController
 {
 public:
   enum Direction { NONE, DOWN, UP };
-  enum Speed { IDLE, FAST, SLOW };
+  enum Speed { IDLE, FAST, SLOW, FINE };
 
   CapacitorController();
   virtual ~CapacitorController();

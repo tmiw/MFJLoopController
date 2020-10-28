@@ -33,8 +33,8 @@ private:
               ADS1015_REG_CONFIG_CLAT_NONLAT |  // Non-latching (default val)
               ADS1015_REG_CONFIG_CPOL_ACTVLOW | // Alert/Rdy active low   (default val)
               ADS1015_REG_CONFIG_CMODE_TRAD |   // Traditional comparator (default val)
-              ADS1015_REG_CONFIG_DR_3300SPS |   // 3300 samples per second
-              ADS1015_REG_CONFIG_MODE_CONTIN;   // Continuous mode
+              ADS1015_REG_CONFIG_DR_920SPS |   // 920 samples per second
+              ADS1015_REG_CONFIG_MODE_SINGLE;   // Single shot mode
         
           // Set PGA/voltage range
           config |= m_gain;

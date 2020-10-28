@@ -21,9 +21,17 @@
 #define ADC_FWD_CH 0
 #define ADC_REV_CH 2
 
+// Fine tuning pulse time.
+#define TUNE_FINE_PULSE_OFF_TIME_MS 250
+#define TUNE_FINE_PULSE_ON_TIME_MS 20
+
 // Slow tuning pulse time.
-#define TUNE_PULSE_OFF_TIME_MS 100
-#define TUNE_PULSE_ON_TIME_MS 20
+#define TUNE_SLOW_PULSE_OFF_TIME_MS 100
+#define TUNE_SLOW_PULSE_ON_TIME_MS 20
+
+// Fast tuning pulse time.
+#define TUNE_FAST_PULSE_OFF_TIME_MS 50
+#define TUNE_FAST_PULSE_ON_TIME_MS 50
 
 // Length of initial "long" pulse when changing directions. This is needed
 // to overcome inertia/resistance in the capacitor prior to slow tuning.
@@ -32,7 +40,10 @@
 // pulse be enabled could result in going very far off course.
 #define TUNE_INERTIA_PULSE_ON_TIME_MS 500
 
-// VSWR "tuning complete" threshold (above which we switch to slow tuning).
-#define FAST_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)2.0)
+// VSWR "tuning complete" threshold (below after which we switch to slow tuning).
+#define FAST_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)3.0)
+
+// VSWR "tuning complete" threshold (below after which we stop tuning).
+#define SLOW_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)2.0)
 
 #endif // CONFIG_H
