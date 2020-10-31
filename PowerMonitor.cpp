@@ -37,11 +37,12 @@ void PowerMonitor::setup()
 
 void PowerMonitor::process()
 {
-  int16_t tmpFwdAdc = ads1015_.readADC_SingleEnded(ADC_FWD_CH);
-  int16_t tmpRevAdc = ads1015_.readADC_SingleEnded(ADC_REV_CH);
+  int16_t tmpFwdAdc = ads1015_.readADC_Differential_0_1(); //readADC_SingleEnded(ADC_FWD_CH);
+  int16_t tmpRevAdc = ads1015_.readADC_Differential_2_3(); //readADC_SingleEnded(ADC_REV_CH);
 
-  forwardPowerAdc_ = tmpFwdAdc;
-  revPowerAdc_ = tmpRevAdc;
+  // LSB of ADC value is still subject to noise after front end buffering/LPF, round based on it.
+  forwardPowerAdc_ = (tmpFwdAdc & 0xFFFE) + ((tmpFwdAdc & 1) << 1);
+  revPowerAdc_ = (tmpRevAdc & 0xFFFE) + ((tmpRevAdc & 1) << 1);
       
   forwardPower_ = powerFromAdc_(forwardPowerAdc_);
   revPower_ = powerFromAdc_(revPowerAdc_);

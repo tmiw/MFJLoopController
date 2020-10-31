@@ -38,23 +38,14 @@ $EndComp
 $Comp
 L Device:L L2
 U 1 1 5F8E8642
-P 3400 1750
-F 0 "L2" V 3590 1750 50  0000 C CNN
-F 1 "18uH" V 3499 1750 50  0000 C CNN
-F 2 "Inductor_THT:L_Axial_L5.3mm_D2.2mm_P10.16mm_Horizontal_Vishay_IM-1" H 3400 1750 50  0001 C CNN
-F 3 "~" H 3400 1750 50  0001 C CNN
-	1    3400 1750
+P 3400 1700
+F 0 "L2" V 3590 1700 50  0000 C CNN
+F 1 "18uH" V 3499 1700 50  0000 C CNN
+F 2 "Inductor_THT:L_Axial_L5.3mm_D2.2mm_P10.16mm_Horizontal_Vishay_IM-1" H 3400 1700 50  0001 C CNN
+F 3 "~" H 3400 1700 50  0001 C CNN
+	1    3400 1700
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	3000 1800 3000 1750
-Wire Wire Line
-	3250 1750 3000 1750
-Connection ~ 3000 1750
-Wire Wire Line
-	3000 2050 3700 2050
-Wire Wire Line
-	3550 1750 3700 1750
 $Comp
 L power:GND #PWR06
 U 1 1 5F8ECC5D
@@ -81,10 +72,6 @@ F 3 "" H 2350 1600 50  0001 C CNN
 $EndComp
 Wire Wire Line
 	2350 1700 2350 1600
-Wire Wire Line
-	3700 2100 3700 2050
-Wire Wire Line
-	3700 1700 3700 1750
 NoConn ~ 4200 1900
 Text Label 5500 2100 0    50   ~ 0
 ISOLATED_GND
@@ -655,7 +642,6 @@ Wire Wire Line
 	2350 2100 3000 2100
 Wire Wire Line
 	3000 2100 3000 2050
-Connection ~ 3000 2050
 $Comp
 L Connector:Conn_01x10_Female J1
 U 1 1 5FB62215
@@ -865,10 +851,6 @@ Text Label 5650 6150 2    50   ~ 0
 ADC_ALERT
 Wire Wire Line
 	5650 6150 5800 6150
-Wire Wire Line
-	3700 1700 4200 1700
-Wire Wire Line
-	3700 2100 4200 2100
 $Comp
 L Mechanical:MountingHole_Pad H1
 U 1 1 5FBD0C84
@@ -957,4 +939,12 @@ F 3 "" H 1000 2450 50  0001 C CNN
 	1    1000 2450
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	4200 2100 3000 2100
+Connection ~ 3000 2100
+Wire Wire Line
+	3550 1700 4200 1700
+Wire Wire Line
+	3250 1700 3000 1700
+Connection ~ 3000 1700
 $EndSCHEMATC
