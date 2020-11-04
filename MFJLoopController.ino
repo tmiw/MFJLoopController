@@ -42,6 +42,10 @@ void setup() {
     capController.setDirection(CapacitorController::NONE);
     capController.setSpeed(CapacitorController::IDLE);
     capController.process();
+    powerMonitor.enableAdc(false);
+
+    // Wait a few ms for the ADC to stop signaling
+    delay(5);
     
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH) {
@@ -58,6 +62,9 @@ void setup() {
 
     // Remount FS
     LittleFS.begin();
+
+    // Re-enable ADC
+    powerMonitor.enableAdc(true);
   });
   ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
     //Serial.printf("Progress: %u%%\r", (progress / (total / 100)));

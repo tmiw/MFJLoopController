@@ -2,6 +2,8 @@
 #include "PowerMonitor.h"
 #include "config.h"
 
+static PowerMonitor* StaticPowerMonitor;
+
 PowerMonitor::PowerMonitor()
 : forwardPower_(0.0)
 , forwardPowerAdc_(0)
@@ -9,7 +11,7 @@ PowerMonitor::PowerMonitor()
 , revPowerAdc_(0)
 , vswr_(0.0)
 {
-  // empty
+  StaticPowerMonitor = this;
 }
 
 PowerMonitor::~PowerMonitor()
@@ -17,32 +19,31 @@ PowerMonitor::~PowerMonitor()
   // empty
 }
 
-/*ICACHE_RAM_ATTR void handleAdcAlertInterrupt()
+ICACHE_RAM_ATTR void handleAdcAlertInterrupt()
 {
-  // Reverse tuning direction and go to next state
-  set_tuning_direction(tuning_direction == TUNE_FWD ? TUNE_REV : TUNE_FWD);
-  autotune_state = AUTOTUNE_SLOW;
-
-  // Reset ADC chip to prevent re-raising interrupt
-  ads1015.getLastConversionResults();
-}*/
+  StaticPowerMonitor->nextAdc();
+}
 
 void PowerMonitor::setup()
 {
   // Set up ADC object.
   ads1015_.begin();
   ads1015_.setGain(ADC_GAIN);
-  //attachInterrupt(digitalPinToInterrupt(ADC_INTERRUPT_PIN), handleAdcAlertInterrupt, RISING);
+  pinMode(ADC_INTERRUPT_PIN, INPUT);
+  attachInterrupt(digitalPinToInterrupt(ADC_INTERRUPT_PIN), handleAdcAlertInterrupt, FALLING);
+
+  // Start background ADC reads.
+  ads1015_.beginReadADC();
 }
 
 void PowerMonitor::process()
 {
-  int16_t tmpFwdAdc = ads1015_.readADC_Differential_0_1(); //readADC_SingleEnded(ADC_FWD_CH);
-  int16_t tmpRevAdc = ads1015_.readADC_Differential_2_3(); //readADC_SingleEnded(ADC_REV_CH);
+  int16_t tmpFwdAdc = ads1015_.getAdcValue(0); // ads1015_.readADC_SingleEnded(ADC_FWD_CH);
+  int16_t tmpRevAdc = ads1015_.getAdcValue(1); // ads1015_.readADC_SingleEnded(ADC_REV_CH);
 
   // LSB of ADC value is still subject to noise after front end buffering/LPF, round based on it.
-  forwardPowerAdc_ = (tmpFwdAdc & 0xFFFE) + ((tmpFwdAdc & 1) << 1);
-  revPowerAdc_ = (tmpRevAdc & 0xFFFE) + ((tmpRevAdc & 1) << 1);
+  forwardPowerAdc_ = tmpFwdAdc; // (tmpFwdAdc & 0xFFFE) + ((tmpFwdAdc & 1) << 1);
+  revPowerAdc_ = tmpRevAdc; //(tmpRevAdc & 0xFFFE) + ((tmpRevAdc & 1) << 1);
       
   forwardPower_ = powerFromAdc_(forwardPowerAdc_);
   revPower_ = powerFromAdc_(revPowerAdc_);
@@ -60,7 +61,14 @@ void PowerMonitor::process()
   if (forwardPower_ > 0.0)
   {
     double coeff = sqrt((double)revPower_ / (double)forwardPower_);
-    vswr_ = (1.0 + coeff) / (1.0 - coeff);
+    if (coeff == 1.0)
+    {
+      vswr_ = 999.9;
+    }
+    else
+    {
+      vswr_ = (1.0 + coeff) / (1.0 - coeff);
+    }
   }
   else
   {
