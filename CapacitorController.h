@@ -8,7 +8,8 @@ class CapacitorController : public ComponentController
 public:
   enum Direction { NONE, DOWN, UP };
   enum Speed { IDLE, FAST, SLOW, FINE };
-
+  enum State { DISABLED, PWM_HIGH, PWM_LOW };
+  
   CapacitorController();
   virtual ~CapacitorController();
 
@@ -24,12 +25,20 @@ public:
   
 private:  
   Direction direction_;  
-  Direction prevDirection_;
   Speed speed_;
   bool onlyOnce_;
 
+  // PWM control
+  State pwmState_;
+  int pwmPin_;
+  int pwmHighTimeMs_;
+  int pwmLowTimeMs_;
+  unsigned long pwmStateStartTime_;
+  
   void enableTuningPin_();
   void disableTuningPins_();
+
+  void setPwmSettings(int pin, int highTimeMs, int lowTimeMs);
 };
 
 #endif // CAPACITOR_CONTROLLER_H
