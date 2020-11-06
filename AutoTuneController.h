@@ -24,25 +24,16 @@ public:
   State getState() const;
   
 private:
-  enum { NUM_SWR_VALS = 5 };
-  
   CapacitorController* pCapacitorController_;
   PowerMonitor* pPowerMonitor_;
   State currentState_;
   Direction autoTuneDirection_;
   double minSWRVal_;
-  double lastSWRVals_[NUM_SWR_VALS];
-  int curIdx_;
   
   CapacitorController::Direction getDirectionForCurrentState_() const;
   CapacitorController::Speed getSpeedForCurrentState_() const;
   double getSWRThresholdForCurrentState_() const;
   State getNextState_() const;
-
-  // SWR list management
-  bool isPastPeak() const;
-  void addSWRReading(double swr);
-  void clearSWRList();
 };
 
 #endif // AUTO_TUNE_CONTROLLER_H

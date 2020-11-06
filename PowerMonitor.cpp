@@ -111,38 +111,42 @@ double PowerMonitor::powerFromAdc_(int16_t adc)
   // Polynominal fitting @ degree 5 based on calculations at https://arachnoid.com/polysolve/
   // and the following data:
   //
-  //   12 0
-  //   2361 5
-  //   3915 10
-  //   4595 15
-  //   5378 20
-  //   6071 25
-  //   6764 30
-  //   7533 35
-  //   8221 40
-  //   8980 45
-  //   9591 50
-  //   10095 55
-  //   10606 60
-  //   11101 65
-  //   11604 70
-  //   12109 75
-  //   12518 80
-  //   12931 85
-  //   13339 90
-  //   13830 95
-  //   14241 100
-  //   eq: y = -4.0017073502796845e-019 x^5 + 1.6638800114614116e-014 x^4 - 2.4968122806285582e-010 x^3 + 1.9615755904512023e-006 x^2 - 1.8702860105643696e-003 x + 1.7639189610096823e-001
+  //   95 0
+  //   1490 1
+  //   1748 2
+  //   2005 3
+  //   2185 4
+  //   2434 5
+  //   3900 10
+  //   4683 15
+  //   5369 20
+  //   6151 25
+  //   6839 30
+  //   7522 35
+  //   8228 40
+  //   8998 45
+  //   9678 50
+  //   10206 55
+  //   10703 60
+  //   11220 65
+  //   11804 70
+  //   12219 75
+  //   12639 80
+  //   13051 85
+  //   13466 90
+  //   13967 95
+  //   14371 100
+  //   eq: y = -2.7763298898827872e-019 x^5 + 1.2528824451236192e-014 x^4 - 2.0200694053523373e-010 x^3 + 1.7298629762675664e-006 x^2 - 1.5215893510124429e-003 x + 3.0373673651590188e-001
   //
   // Note: fwd and reverse use different equations due to slightly different readings (possibly
   // due to slight differences in toroid winding). Autotune algorithm should not be impacted
   // as it uses the lowest SWR regardless of what we calculate it to. You may also want to update 
   // the following equation if you're using a different implementation of the SWR bridge.
   return abs(
-    -4.0017073502796845e-019 * pow(adc, 5) +
-    1.6638800114614116e-014 * pow(adc, 4) - 
-    2.4968122806285582e-010 * pow(adc, 3) + 
-    1.9615755904512023e-006 * pow(adc, 2) - 
-    1.8702860105643696e-003 * adc + 
-    1.7639189610096823e-001);
+    -2.7763298898827872e-019 * pow(adc, 5) +
+    1.2528824451236192e-014 * pow(adc, 4) - 
+    2.0200694053523373e-010 * pow(adc, 3) + 
+    1.7298629762675664e-006 * pow(adc, 2) - 
+    1.5215893510124429e-003 * adc + 
+    3.0373673651590188e-001);
 }
