@@ -94,8 +94,8 @@ private:
                                             // match
           ADS1015_REG_CONFIG_CLAT_NONLAT |  // Non-latching mode
           ADS1015_REG_CONFIG_CPOL_ACTVLOW | // Alert/Rdy active low   (default val)
-          ADS1015_REG_CONFIG_CMODE_WINDOW | // Window comparator (default val)
-          ADS1015_REG_CONFIG_DR_1600SPS |   // 1600 samples per second (default)
+          ADS1015_REG_CONFIG_CMODE_WINDOW | // Window comparator
+          ADS1015_REG_CONFIG_DR_3300SPS |   // 3300 SPS
           ADS1015_REG_CONFIG_MODE_SINGLE;   // Single shot mode.
       
         // Set PGA/voltage range
@@ -104,10 +104,10 @@ private:
         // Set single-ended input channel
         switch (currentChannel_) {
         case (0):
-          config |= /*ADS1015_REG_CONFIG_MUX_SINGLE_0;*/ ADS1015_REG_CONFIG_MUX_DIFF_0_1;
+          config |= ADS1015_REG_CONFIG_MUX_DIFF_0_1;
           break;
         case (1):
-          config |= /*ADS1015_REG_CONFIG_MUX_SINGLE_2;*/ ADS1015_REG_CONFIG_MUX_DIFF_2_3;
+          config |= ADS1015_REG_CONFIG_MUX_DIFF_2_3;
           break;
         }
       
