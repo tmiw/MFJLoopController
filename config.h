@@ -22,7 +22,7 @@
 #define ADC_REV_CH 2
 
 // Fine tuning pulse time.
-#define TUNE_FINE_PULSE_OFF_TIME_MS 250
+#define TUNE_FINE_PULSE_OFF_TIME_MS 120
 #define TUNE_FINE_PULSE_ON_TIME_MS 20
 
 // Slow tuning pulse time.
