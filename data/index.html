@@ -88,43 +88,13 @@
     </div>
 </body>
 <script language="javascript">
-    slowTuneUp = function() {
-        currentReq = $.ajax(
-            {
-                url: "/manual_tune?direction=up&speed=slow&enable=true",
-                dataType: 'json',
-                complete: function() { 
-                    if ($("#slow-up").hasClass("btn-success")) currentReqTO = setTimeout(slowTuneUp, 100); 
-                }
-            });
-    };
-    
-    slowTuneDown = function() {
-        currentReq = $.ajax(
-            {
-                url: "/manual_tune?direction=down&speed=slow&enable=true",
-                dataType: 'json',
-                complete: function() { 
-                    if ($("#slow-down").hasClass("btn-success")) currentReqTO = setTimeout(slowTuneDown, 100); 
-                }
-            });
-    };
-    
-    abortCurrentReq = function() {
-        if (currentReq) currentReq.abort();
-        if (currentReqTO) clearTimeout(currentReqTO);
+    commandSocket = new WebSocket("ws://" + window.location.hostname + ":81/");
+    commandSocket.onmessage = function(event) {
+        var xhr = JSON.parse(event.data);
         
-        $("#slow-down").removeClass("btn-success");
-        $("#slow-up").removeClass("btn-success");
-        $("#slow-down").addClass("btn-primary");
-        $("#slow-up").addClass("btn-primary");    
-    };
-    
-    currentReq = null;
-    currentReqTO = null;
-    
-    function updateStatus() {
-        $.ajax("/status").done(function(xhr) {
+        // Ignore all but "status" for now.
+        if (xhr.command == "status")
+        {
             var fwd_power = xhr.fwd_power;
             var fwd_power_adc = xhr.fwd_power_adc;
             var rev_power = xhr.rev_power;
@@ -134,19 +104,23 @@
             var vswr = xhr.vswr;
             var autotune_state = xhr.autotune_state;
             var autotune_direction = xhr.autotune_direction;
-            
+        
             // Set table at bottom.
             $("#fwd_power").text(fwd_power);
             $("#fwd_power_adc").text(fwd_power_adc);
             $("#rev_power").text(rev_power);
             $("#rev_power_adc").text(rev_power_adc);
             $("#vswr").text(vswr);
-            
+        
             // Set button states.
             $("#fast-down").removeClass("btn-success");
             $("#fast-up").removeClass("btn-success");
             $("#fast-down").addClass("btn-primary");
             $("#fast-up").addClass("btn-primary");
+            $("#slow-down").removeClass("btn-success");
+            $("#slow-up").removeClass("btn-success");
+            $("#slow-down").addClass("btn-primary");
+            $("#slow-up").addClass("btn-primary");
             $("#at-down").removeClass("btn-success");
             $("#at-up").removeClass("btn-success");
             $("#at-down").removeClass("btn-warning");
@@ -166,7 +140,20 @@
                     $("#fast-down").addClass("btn-success");
                 }
             }
-        
+            else if (capacitor_speed == "2")
+            {
+                if (capacitor_direction == "2")
+                {
+                    $("#slow-up").removeClass("btn-primary");
+                    $("#slow-up").addClass("btn-success");
+                }
+                else if (capacitor_direction == "1")
+                {
+                    $("#slow-down").removeClass("btn-primary");
+                    $("#slow-down").addClass("btn-success");
+                }
+            }
+    
             if (autotune_state == "1" || autotune_state == "2")
             {
                 // Fast autotune
@@ -195,67 +182,120 @@
                     $("#at-up").addClass("btn-warning");
                 }
             }
-            setTimeout(updateStatus, 1000);
-        });
-    }
+        } else {
+            console.log(event.data);
+        }
+    };
     
     $(document).ready(function () {
         // Initialize button actions.
         $("#slow-up").mousedown(function() {
-            abortCurrentReq();
-            $("#slow-up").removeClass("btn-primary");
-            $("#slow-up").addClass("btn-success");
-            slowTuneUp();
+            //$("#slow-up").removeClass("btn-primary");
+            //$("#slow-up").addClass("btn-success");
+            commandSocket.send(JSON.stringify({
+                "command": "manual_tune",
+                "direction": "up",
+                "speed": "slow",
+                "enable": true
+            }));
         });
+        
         $("#slow-up").mouseup(function() {
-            $("#slow-up").addClass("btn-primary");
-            $("#slow-up").removeClass("btn-success");
+            //$("#slow-up").addClass("btn-primary");
+            //$("#slow-up").removeClass("btn-success");
+            commandSocket.send(JSON.stringify({
+                "command": "manual_tune",
+                "enable": false
+            }));
         });
+        
         $("#slow-down").mousedown(function() {
-            abortCurrentReq();
-            $("#slow-down").removeClass("btn-primary");
-            $("#slow-down").addClass("btn-success");
-            slowTuneDown();
+            //$("#slow-down").removeClass("btn-primary");
+            //$("#slow-down").addClass("btn-success");
+            commandSocket.send(JSON.stringify({
+                "command": "manual_tune",
+                "direction": "down",
+                "speed": "slow",
+                "enable": true
+            }));
         });
+        
         $("#slow-down").mouseup(function() {
-            $("#slow-down").addClass("btn-primary");
-            $("#slow-down").removeClass("btn-success");
+            //$("#slow-down").addClass("btn-primary");
+            //$("#slow-down").removeClass("btn-success");
+            commandSocket.send(JSON.stringify({
+                "command": "manual_tune",
+                "enable": false
+            }));
         });
+        
         $("#fast-up").mousedown(function() {
-           $.ajax("/manual_tune?direction=up&speed=fast&enable=true");
+            commandSocket.send(JSON.stringify({
+                "command": "manual_tune",
+                "direction": "up",
+                "speed": "fast",
+                "enable": true
+            }));
         });
+        
         $("#fast-up").mouseup(function() {
-           $.ajax("/manual_tune?enable=false");
+            commandSocket.send(JSON.stringify({
+                "command": "manual_tune",
+                "enable": false
+            }));
         });
+        
         $("#fast-down").mousedown(function() {
-           $.ajax("/manual_tune?direction=down&speed=fast&enable=true");
+            commandSocket.send(JSON.stringify({
+                "command": "manual_tune",
+                "direction": "down",
+                "speed": "fast",
+                "enable": true
+            }));
         });
+        
         $("#fast-down").mouseup(function() {
-           $.ajax("/manual_tune?enable=false");
+            commandSocket.send(JSON.stringify({
+                "command": "manual_tune",
+                "enable": false
+            }));
         });
         
         $("#at-up").click(function() {
             if ($("#at-up").hasClass("btn-primary"))
             {
-                $.ajax("/autotune?direction=up&enable=true");
+                commandSocket.send(JSON.stringify({
+                    "command": "auto_tune",
+                    "direction": "up",
+                    "enable": true
+                }));
             }
             else
             {
-                $.ajax("/autotune?enable=false");
+                commandSocket.send(JSON.stringify({
+                    "command": "auto_tune",
+                    "enable": false
+                }));
             }
         });
 
         $("#at-down").click(function() {
             if ($("#at-down").hasClass("btn-primary"))
             {
-                $.ajax("/autotune?direction=down&enable=true");
+                commandSocket.send(JSON.stringify({
+                    "command": "auto_tune",
+                    "direction": "down",
+                    "enable": true
+                }));
             }
             else
             {
-                $.ajax("/autotune?enable=false");
+                commandSocket.send(JSON.stringify({
+                    "command": "auto_tune",
+                    "enable": false
+                }));
             }
         });
-        setTimeout(updateStatus, 1000);
    }
    );
 </script>

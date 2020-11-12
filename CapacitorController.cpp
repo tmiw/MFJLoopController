@@ -31,9 +31,7 @@ void CapacitorController::setDirection(Direction dir)
 {
   // Force both tuning pins to low in the event of a direction change
   // to guarantee that the system doesn't short out.
-  digitalWrite(TUNE_UP_PIN, LOW);
-  digitalWrite(TUNE_DOWN_PIN, LOW);
-  digitalWrite(TUNE_LED_PIN, HIGH);
+  disableTuningPins_();
   
   // Set direction. Next call to process() will set the needed pin to high.
   direction_ = dir;
@@ -52,11 +50,6 @@ void CapacitorController::setSpeed(CapacitorController::Speed speed)
 CapacitorController::Speed CapacitorController::getSpeed() const
 {
   return speed_;
-}
-
-void CapacitorController::onlyOnce(bool once)
-{
-  onlyOnce_ = once;
 }
 
 void CapacitorController::process()
@@ -108,13 +101,6 @@ void CapacitorController::process()
           disableTuningPins_();
           pwmState_ = PWM_HIGH;
           pwmStateStartTime_ = 0; // Will reset to the current time on next loop
-
-          if (onlyOnce_)
-          {
-            speed_ = IDLE;
-            direction_ = NONE;
-            onlyOnce_ = false;
-          }
         }
         break;
     }
@@ -133,6 +119,7 @@ void CapacitorController::forceStop()
   disableTuningPins_();
   speed_ = IDLE;
   direction_ = NONE;
+  pwmState_ = DISABLED;
 }
 
 void CapacitorController::setPwmSettings(int pin, int highTimeMs, int lowTimeMs)

@@ -17,7 +17,6 @@ public:
   Direction getDirection() const;
   void setSpeed(Speed speed);
   Speed getSpeed() const;
-  void onlyOnce(bool once);
   virtual void process();
   virtual void setup();
 
@@ -26,7 +25,6 @@ public:
 private:  
   Direction direction_;  
   Speed speed_;
-  bool onlyOnce_;
 
   // PWM control
   State pwmState_;

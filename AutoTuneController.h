@@ -10,7 +10,7 @@ class AutoTuneController : public ComponentController
 {
 public:
   enum Direction { NONE, DOWN, UP };
-  enum State { IDLE, BEGIN_TUNE, /*FAST_TUNE,*/ SLOW_TUNE, TOP_UP };
+  enum State { IDLE, BEGIN_TUNE, FAST_TUNE, SLOW_TUNE, TOP_UP, FAST_TUNE_WAIT, SLOW_TUNE_WAIT };
 
   AutoTuneController(CapacitorController* pCapacitorController, PowerMonitor* pPowerMonitor);
   virtual ~AutoTuneController();
@@ -29,6 +29,7 @@ private:
   State currentState_;
   Direction autoTuneDirection_;
   double minSWRVal_;
+  unsigned long waitTimeBegin_;
   
   CapacitorController::Direction getDirectionForCurrentState_() const;
   CapacitorController::Speed getSpeedForCurrentState_() const;

@@ -2,6 +2,8 @@
 #define WEB_SERVER_CONTROLLER_H
 
 #include <ESP8266WebServer.h>
+#include <ArduinoWebsockets.h>
+#include <vector>
 #include "ComponentController.h"
 
 class CapacitorController;
@@ -22,12 +24,12 @@ private:
   CapacitorController* pCapacitorController_;
   PowerMonitor* pPowerMonitor_;
   AutoTuneController* pAutoTuneController_;
+  websockets::WebsocketsServer socketServer_;
+  std::vector<websockets::WebsocketsClient> clientList_;
   
-  void replyBadRequest_(String msg);
   void handleNotFound_();
-  void handleManualTune_();
-  void handleStatus_();
-  void handleAutoTune_();
+  void sendStatusToClient_(websockets::WebsocketsClient& client);
+  void handleClientRequest_(websockets::WebsocketsClient& client, websockets::WebsocketsMessage msg);
 };
 
 #endif // WEB_SERVER_CONTROLLER_H
