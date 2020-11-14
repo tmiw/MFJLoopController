@@ -62,7 +62,7 @@ void PowerMonitor::process()
     }
     else
     {
-      vswr_ = (1.0 + coeff) / (1.0 - coeff);
+      vswr_ = abs((1.0 + coeff) / (1.0 - coeff));
     }
   }
   else

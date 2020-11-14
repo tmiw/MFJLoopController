@@ -22,8 +22,8 @@
 #define ADC_REV_CH 2
 
 // Fine tuning pulse time.
-#define TUNE_FINE_PULSE_OFF_TIME_MS 150
-#define TUNE_FINE_PULSE_ON_TIME_MS 20
+#define TUNE_FINE_PULSE_OFF_TIME_MS 115
+#define TUNE_FINE_PULSE_ON_TIME_MS 18
 
 // Slow tuning pulse time.
 #define TUNE_SLOW_PULSE_OFF_TIME_MS 115
@@ -33,11 +33,14 @@
 #define TUNE_FAST_PULSE_OFF_TIME_MS 0
 #define TUNE_FAST_PULSE_ON_TIME_MS 36
 
-// Length of time in milliseconds to wait after detecting SWR dip before auto-tuner
-// proceeds with the next state. This is because the antenna will continue moving even
-// after power is removed, so we want to ensure that we go through all of the necessary
-// tuning states.
-#define AUTOTUNE_STATE_WAIT_TIME_MS 250
+// Minimum SWR difference (from prior reading) to wait for while in a wait state
+// before proceeding to the next state.
+#define AUTOTUNE_MIN_SWR_DIFF_IN_WAIT 0.1
+
+// Length of time to move in the opposite direction before beginning auto-tune. This
+// time is to ensure that we pass the dip while in fast mode (instead of stopping just
+// short of it).
+#define AUTOTUNE_BEGIN_TUNE_TIME_MS 1000
 
 // VSWR "tuning complete" threshold (below after which we switch to slow tuning).
 #define FAST_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)3.0)

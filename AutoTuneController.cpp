@@ -26,6 +26,7 @@ void AutoTuneController::setup()
 
 void AutoTuneController::beginTune(Direction direction)
 {
+  waitTimeBegin_ = 0;
   currentState_ = BEGIN_TUNE;
   autoTuneDirection_ = direction;
   minSWRVal_ = DBL_MAX;
@@ -48,13 +49,26 @@ void AutoTuneController::process()
   }
 
   // Get current SWR.
-  double swr = pPowerMonitor_->getVSWR();;
+  double swr = pPowerMonitor_->getVSWR();
   
   switch(currentState_)
   {
     case BEGIN_TUNE:
-      currentState_ = FAST_TUNE; // TODO: figure out why starting with FAST_TUNE is unreliable
-      minSWRVal_ = DBL_MAX;
+      // Move in the opposite direction for a bit to guarantee we pass the dip while in fast mode.
+      pCapacitorController_->setDirection(getDirectionForCurrentState_());
+      pCapacitorController_->setSpeed(getSpeedForCurrentState_());
+      
+      if (waitTimeBegin_ == 0)
+      {
+        waitTimeBegin_ = millis();      
+      }
+
+      if ((millis() - waitTimeBegin_) >= AUTOTUNE_BEGIN_TUNE_TIME_MS)
+      {
+        pCapacitorController_->forceStop();
+        currentState_ = getNextState_();
+        minSWRVal_ = DBL_MAX;
+      }
       break;
     case FAST_TUNE:
     case SLOW_TUNE:
@@ -66,9 +80,10 @@ void AutoTuneController::process()
       {
         minSWRVal_ = swr;
       }
-      else if (minSWRVal_ != DBL_MAX)
+      
+      if (minSWRVal_ != DBL_MAX)
       {
-        if (swr > minSWRVal_)
+        if (swr > minSWRVal_ || (currentState_ == TOP_UP))
         {
           pCapacitorController_->forceStop(); // to reduce the amount of distance to cover in slow mode.
           currentState_ = getNextState_();
@@ -81,15 +96,13 @@ void AutoTuneController::process()
     case FAST_TUNE_WAIT:
     case SLOW_TUNE_WAIT:
       // Wait state to allow SWR to stabilize after terminating tuning step.
-      if (waitTimeBegin_ == 0)
+      if (abs(minSWRVal_ - swr) <= AUTOTUNE_MIN_SWR_DIFF_IN_WAIT)
       {
-        waitTimeBegin_ = millis();      
-      }
-
-      if ((millis() - waitTimeBegin_) >= AUTOTUNE_STATE_WAIT_TIME_MS)
-      {
+        minSWRVal_ = DBL_MAX;
         currentState_ = getNextState_();
       }
+
+      minSWRVal_ = swr;
       break;
     case IDLE:
     default:
@@ -114,6 +127,7 @@ CapacitorController::Direction AutoTuneController::getDirectionForCurrentState_(
     case FAST_TUNE:
     case TOP_UP:
       return autoTuneDirection_ == DOWN ? CapacitorController::DOWN : CapacitorController::UP;
+    case BEGIN_TUNE:
     case SLOW_TUNE:
       return autoTuneDirection_ == DOWN ? CapacitorController::UP : CapacitorController::DOWN;
     default:
@@ -125,6 +139,7 @@ CapacitorController::Speed AutoTuneController::getSpeedForCurrentState_() const
 {
   switch(currentState_)
   {
+    case BEGIN_TUNE:
     case FAST_TUNE:
       return CapacitorController::FAST;
     case SLOW_TUNE:
@@ -154,6 +169,8 @@ AutoTuneController::State AutoTuneController::getNextState_() const
 {
   switch(currentState_)
   {
+    case BEGIN_TUNE:
+      return FAST_TUNE;
     case FAST_TUNE:
       return FAST_TUNE_WAIT;
     case FAST_TUNE_WAIT:

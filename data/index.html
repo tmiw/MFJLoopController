@@ -140,7 +140,7 @@
                     $("#fast-down").addClass("btn-success");
                 }
             }
-            else if (capacitor_speed == "2")
+            else if (capacitor_speed == "2" || capacitor_speed == "3")
             {
                 if (capacitor_direction == "2")
                 {
@@ -168,7 +168,7 @@
                     $("#at-up").addClass("btn-success");
                 }
             }
-            else if (autotune_state == "3")
+            else if (autotune_state == "3" || autotune_state == "4")
             {
                 // Slow autotune
                 if (autotune_direction == "1")
@@ -182,8 +182,6 @@
                     $("#at-up").addClass("btn-warning");
                 }
             }
-        } else {
-            console.log(event.data);
         }
     };
     
