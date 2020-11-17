@@ -22,8 +22,8 @@
 #define ADC_REV_CH 2
 
 // Fine tuning pulse time.
-#define TUNE_FINE_PULSE_OFF_TIME_MS 115
-#define TUNE_FINE_PULSE_ON_TIME_MS 18
+#define TUNE_FINE_PULSE_OFF_TIME_MS 230
+#define TUNE_FINE_PULSE_ON_TIME_MS 36
 
 // Slow tuning pulse time.
 #define TUNE_SLOW_PULSE_OFF_TIME_MS 115
@@ -40,7 +40,7 @@
 // Length of time to move in the opposite direction before beginning auto-tune. This
 // time is to ensure that we pass the dip while in fast mode (instead of stopping just
 // short of it).
-#define AUTOTUNE_BEGIN_TUNE_TIME_MS 1000
+#define AUTOTUNE_BEGIN_TUNE_TIME_MS 2000
 
 // VSWR "tuning complete" threshold (below after which we switch to slow tuning).
 #define FAST_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)3.0)

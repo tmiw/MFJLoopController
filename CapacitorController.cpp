@@ -32,6 +32,8 @@ void CapacitorController::setDirection(Direction dir)
   // Force both tuning pins to low in the event of a direction change
   // to guarantee that the system doesn't short out.
   disableTuningPins_();
+  pwmState_ = DISABLED;
+  pwmStateStartTime_ = 0;
   
   // Set direction. Next call to process() will set the needed pin to high.
   direction_ = dir;
@@ -82,17 +84,24 @@ void CapacitorController::process()
     switch (pwmState_)
     {
       case PWM_HIGH:
+        //GPOC = (1 << TUNE_LED_PIN);
+        //GPOS = (1 << pwmPin_);
         digitalWrite(TUNE_LED_PIN, LOW);
         digitalWrite(pwmPin_, HIGH);
 
         if ((currentTime - pwmStateStartTime_) >= pwmHighTimeMs_)
         {
-          disableTuningPins_();
-          pwmState_ = PWM_LOW;
+          if (pwmLowTimeMs_ > 0)
+          {
+            disableTuningPins_();
+            pwmState_ = PWM_LOW;
+          }
           pwmStateStartTime_ = 0; // Will reset to the current time on next loop
         }
         break;
       case PWM_LOW:
+        //GPOS = (1 << TUNE_LED_PIN);
+        //GPOC = (1 << pwmPin_);
         digitalWrite(TUNE_LED_PIN, HIGH);
         digitalWrite(pwmPin_, LOW);
 
@@ -109,6 +118,10 @@ void CapacitorController::process()
 
 void CapacitorController::disableTuningPins_()
 {
+  // Directly manipulating the needed registers is far faster than using
+  // digitalWrite() and thus will reduce the overshoot when switching directions.
+  //GPOC = (1 << TUNE_UP_PIN) | (1 << TUNE_DOWN_PIN);
+  //GPOS = (1 << TUNE_LED_PIN);
   digitalWrite(TUNE_UP_PIN, LOW);
   digitalWrite(TUNE_DOWN_PIN, LOW);
   digitalWrite(TUNE_LED_PIN, HIGH);

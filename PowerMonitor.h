@@ -95,7 +95,7 @@ private:
           ADS1015_REG_CONFIG_CLAT_NONLAT |  // Non-latching mode
           ADS1015_REG_CONFIG_CPOL_ACTVLOW | // Alert/Rdy active low   (default val)
           ADS1015_REG_CONFIG_CMODE_WINDOW | // Window comparator
-          ADS1015_REG_CONFIG_DR_1600SPS |   // 1600 SPS
+          ADS1015_REG_CONFIG_DR_3300SPS |   // 3300 SPS
           ADS1015_REG_CONFIG_MODE_SINGLE;   // Single shot mode.
       
         // Set PGA/voltage range
