@@ -73,14 +73,6 @@ $EndComp
 Wire Wire Line
 	2350 1700 2350 1600
 NoConn ~ 4200 1900
-Text Label 5500 2100 0    50   ~ 0
-ISOLATED_GND
-Text Label 5450 1700 0    50   ~ 0
-ISOLATED_12V
-Wire Wire Line
-	5450 1700 5200 1700
-Wire Wire Line
-	5500 2100 5200 2100
 $Comp
 L Device:C C1
 U 1 1 5F906717
@@ -947,4 +939,54 @@ Wire Wire Line
 Wire Wire Line
 	3250 1700 3000 1700
 Connection ~ 3000 1700
+$Comp
+L Device:CP1 C8
+U 1 1 5FB4E006
+P 5350 1900
+F 0 "C8" H 5465 1946 50  0000 L CNN
+F 1 "220uF" H 5465 1855 50  0000 L CNN
+F 2 "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm" H 5350 1900 50  0001 C CNN
+F 3 "~" H 5350 1900 50  0001 C CNN
+	1    5350 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5350 1750 5350 1700
+Connection ~ 5350 1700
+Wire Wire Line
+	5350 1700 5200 1700
+Wire Wire Line
+	5350 2050 5350 2100
+Connection ~ 5350 2100
+Wire Wire Line
+	5350 2100 5200 2100
+$Comp
+L Device:R R9
+U 1 1 5FB62970
+P 5800 1900
+F 0 "R9" H 5870 1946 50  0000 L CNN
+F 1 "1K" H 5870 1855 50  0000 L CNN
+F 2 "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal" V 5730 1900 50  0001 C CNN
+F 3 "~" H 5800 1900 50  0001 C CNN
+	1    5800 1900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5800 1700 5800 1750
+Wire Wire Line
+	5350 1700 5800 1700
+Wire Wire Line
+	5800 2100 5800 2050
+Wire Wire Line
+	5350 2100 5800 2100
+Text Label 5800 2300 0    50   ~ 0
+ISOLATED_GND
+Text Label 5800 1550 0    50   ~ 0
+ISOLATED_12V
+Wire Wire Line
+	5800 1550 5800 1700
+Connection ~ 5800 1700
+Wire Wire Line
+	5800 2100 5800 2300
+Connection ~ 5800 2100
 $EndSCHEMATC
