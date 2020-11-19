@@ -89,6 +89,12 @@
 </body>
 <script language="javascript">
     commandSocket = new WebSocket("ws://" + window.location.hostname + ":81/");
+    commandSocket.onopen = function() {
+        window.onbeforeunload = function() {
+            commandSocket.close();
+        };
+    };
+    
     commandSocket.onmessage = function(event) {
         var xhr = JSON.parse(event.data);
         

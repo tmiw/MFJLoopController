@@ -50,26 +50,27 @@ void WebServerController::process()
   }
 
   // Send current status to existing clients and handle client requests.
-  std::vector<websockets::WebsocketsClient> activeList;
-  for (auto& client : clientList_)
+  auto iter = clientList_.begin();
+  while (iter != clientList_.end())
   {
-    if (client.available())
+    if (iter->available())
     {
-      client.onMessage([&](websockets::WebsocketsMessage msg) {
-        handleClientRequest_(client, msg);
+      iter->onMessage([&](websockets::WebsocketsMessage msg) {
+        handleClientRequest_(*iter, msg);
       });
-      client.poll(); // Handle inbound messages
+      iter->poll(); // Handle inbound messages
       
-      sendStatusToClient_(client); // TODO: we don't need to send the current status every time through the loop.
-      activeList.push_back(client);
+      sendStatusToClient_(*iter); // TODO: we don't need to send the current status every time through the loop.
+      iter++;
     }
     else
     {
-      client.close();
+      iter->close();
+      auto oldIter = iter;
+      iter++;
+      clientList_.erase(oldIter);
     }
   }
-
-  clientList_ = activeList;
 }
 
 void WebServerController::handleNotFound_()
