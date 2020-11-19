@@ -88,108 +88,116 @@
     </div>
 </body>
 <script language="javascript">
-    commandSocket = new WebSocket("ws://" + window.location.hostname + ":81/");
-    commandSocket.onopen = function() {
-        window.onbeforeunload = function() {
-            commandSocket.close();
+    var initWebSocket = function() {
+        commandSocket = new WebSocket("ws://" + window.location.hostname + ":81/");
+        commandSocket.onclose = function() {
+            initWebSocket();
+        };
+        
+        commandSocket.onopen = function() {
+            window.onbeforeunload = function() {
+                commandSocket.close();
+            };
+        };
+    
+        commandSocket.onmessage = function(event) {
+            var xhr = JSON.parse(event.data);
+        
+            // Ignore all but "status" for now.
+            if (xhr.command == "status")
+            {
+                var fwd_power = xhr.fwd_power;
+                var fwd_power_adc = xhr.fwd_power_adc;
+                var rev_power = xhr.rev_power;
+                var rev_power_adc = xhr.rev_power_adc;
+                var capacitor_speed = xhr.capacitor_speed;
+                var capacitor_direction = xhr.capacitor_direction;
+                var vswr = xhr.vswr;
+                var autotune_state = xhr.autotune_state;
+                var autotune_direction = xhr.autotune_direction;
+        
+                // Set table at bottom.
+                $("#fwd_power").text(fwd_power);
+                $("#fwd_power_adc").text(fwd_power_adc);
+                $("#rev_power").text(rev_power);
+                $("#rev_power_adc").text(rev_power_adc);
+                $("#vswr").text(vswr);
+        
+                // Set button states.
+                $("#fast-down").removeClass("btn-success");
+                $("#fast-up").removeClass("btn-success");
+                $("#fast-down").addClass("btn-primary");
+                $("#fast-up").addClass("btn-primary");
+                $("#slow-down").removeClass("btn-success");
+                $("#slow-up").removeClass("btn-success");
+                $("#slow-down").addClass("btn-primary");
+                $("#slow-up").addClass("btn-primary");
+                $("#at-down").removeClass("btn-success");
+                $("#at-up").removeClass("btn-success");
+                $("#at-down").removeClass("btn-warning");
+                $("#at-up").removeClass("btn-warning");
+                $("#at-down").addClass("btn-primary");
+                $("#at-up").addClass("btn-primary");
+                if (capacitor_speed == "1")
+                {
+                    if (capacitor_direction == "2")
+                    {
+                        $("#fast-up").removeClass("btn-primary");
+                        $("#fast-up").addClass("btn-success");
+                    }
+                    else if (capacitor_direction == "1")
+                    {
+                        $("#fast-down").removeClass("btn-primary");
+                        $("#fast-down").addClass("btn-success");
+                    }
+                }
+                else if (capacitor_speed == "2" || capacitor_speed == "3")
+                {
+                    if (capacitor_direction == "2")
+                    {
+                        $("#slow-up").removeClass("btn-primary");
+                        $("#slow-up").addClass("btn-success");
+                    }
+                    else if (capacitor_direction == "1")
+                    {
+                        $("#slow-down").removeClass("btn-primary");
+                        $("#slow-down").addClass("btn-success");
+                    }
+                }
+    
+                if (autotune_state == "1" || autotune_state == "2")
+                {
+                    // Fast autotune
+                    if (autotune_direction == "1")
+                    {
+                        $("#at-down").removeClass("btn-primary");
+                        $("#at-down").addClass("btn-success");
+                    }
+                    else if (autotune_direction == "2")
+                    {
+                        $("#at-up").removeClass("btn-primary");
+                        $("#at-up").addClass("btn-success");
+                    }
+                }
+                else if (autotune_state == "3" || autotune_state == "4")
+                {
+                    // Slow autotune
+                    if (autotune_direction == "1")
+                    {
+                        $("#at-down").removeClass("btn-primary");
+                        $("#at-down").addClass("btn-warning");
+                    }
+                    else if (autotune_direction == "2")
+                    {
+                        $("#at-up").removeClass("btn-primary");
+                        $("#at-up").addClass("btn-warning");
+                    }
+                }
+            }
         };
     };
     
-    commandSocket.onmessage = function(event) {
-        var xhr = JSON.parse(event.data);
-        
-        // Ignore all but "status" for now.
-        if (xhr.command == "status")
-        {
-            var fwd_power = xhr.fwd_power;
-            var fwd_power_adc = xhr.fwd_power_adc;
-            var rev_power = xhr.rev_power;
-            var rev_power_adc = xhr.rev_power_adc;
-            var capacitor_speed = xhr.capacitor_speed;
-            var capacitor_direction = xhr.capacitor_direction;
-            var vswr = xhr.vswr;
-            var autotune_state = xhr.autotune_state;
-            var autotune_direction = xhr.autotune_direction;
-        
-            // Set table at bottom.
-            $("#fwd_power").text(fwd_power);
-            $("#fwd_power_adc").text(fwd_power_adc);
-            $("#rev_power").text(rev_power);
-            $("#rev_power_adc").text(rev_power_adc);
-            $("#vswr").text(vswr);
-        
-            // Set button states.
-            $("#fast-down").removeClass("btn-success");
-            $("#fast-up").removeClass("btn-success");
-            $("#fast-down").addClass("btn-primary");
-            $("#fast-up").addClass("btn-primary");
-            $("#slow-down").removeClass("btn-success");
-            $("#slow-up").removeClass("btn-success");
-            $("#slow-down").addClass("btn-primary");
-            $("#slow-up").addClass("btn-primary");
-            $("#at-down").removeClass("btn-success");
-            $("#at-up").removeClass("btn-success");
-            $("#at-down").removeClass("btn-warning");
-            $("#at-up").removeClass("btn-warning");
-            $("#at-down").addClass("btn-primary");
-            $("#at-up").addClass("btn-primary");
-            if (capacitor_speed == "1")
-            {
-                if (capacitor_direction == "2")
-                {
-                    $("#fast-up").removeClass("btn-primary");
-                    $("#fast-up").addClass("btn-success");
-                }
-                else if (capacitor_direction == "1")
-                {
-                    $("#fast-down").removeClass("btn-primary");
-                    $("#fast-down").addClass("btn-success");
-                }
-            }
-            else if (capacitor_speed == "2" || capacitor_speed == "3")
-            {
-                if (capacitor_direction == "2")
-                {
-                    $("#slow-up").removeClass("btn-primary");
-                    $("#slow-up").addClass("btn-success");
-                }
-                else if (capacitor_direction == "1")
-                {
-                    $("#slow-down").removeClass("btn-primary");
-                    $("#slow-down").addClass("btn-success");
-                }
-            }
-    
-            if (autotune_state == "1" || autotune_state == "2")
-            {
-                // Fast autotune
-                if (autotune_direction == "1")
-                {
-                    $("#at-down").removeClass("btn-primary");
-                    $("#at-down").addClass("btn-success");
-                }
-                else if (autotune_direction == "2")
-                {
-                    $("#at-up").removeClass("btn-primary");
-                    $("#at-up").addClass("btn-success");
-                }
-            }
-            else if (autotune_state == "3" || autotune_state == "4")
-            {
-                // Slow autotune
-                if (autotune_direction == "1")
-                {
-                    $("#at-down").removeClass("btn-primary");
-                    $("#at-down").addClass("btn-warning");
-                }
-                else if (autotune_direction == "2")
-                {
-                    $("#at-up").removeClass("btn-primary");
-                    $("#at-up").addClass("btn-warning");
-                }
-            }
-        }
-    };
+    initWebSocket();
     
     $(document).ready(function () {
         // Initialize button actions.
