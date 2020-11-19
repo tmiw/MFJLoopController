@@ -117,13 +117,13 @@
             // Ignore all but "status" for now.
             if (xhr.command == "status")
             {
-                var fwd_power = xhr.fwd_power;
+                var fwd_power = xhr.fwd_power.toFixed(1);
                 var fwd_power_adc = xhr.fwd_power_adc;
-                var rev_power = xhr.rev_power;
+                var rev_power = xhr.rev_power.toFixed(1);
                 var rev_power_adc = xhr.rev_power_adc;
                 var capacitor_speed = xhr.capacitor_speed;
                 var capacitor_direction = xhr.capacitor_direction;
-                var vswr = xhr.vswr;
+                var vswr = xhr.vswr.toFixed(2);
                 var autotune_state = xhr.autotune_state;
                 var autotune_direction = xhr.autotune_direction;
         
