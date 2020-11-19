@@ -3,6 +3,7 @@
 
 #include <ESP8266WebServer.h>
 #include <ArduinoWebsockets.h>
+#include <Arduino_JSON.h>
 #include <vector>
 #include "ComponentController.h"
 
@@ -26,9 +27,11 @@ private:
   AutoTuneController* pAutoTuneController_;
   websockets::WebsocketsServer socketServer_;
   std::vector<websockets::WebsocketsClient> clientList_;
+  JSONVar currentStatus_;
   
   void handleNotFound_();
-  void sendStatusToClient_(websockets::WebsocketsClient& client);
+  JSONVar generateStatusOutput_();
+  void sendStatusToClient_(websockets::WebsocketsClient& client, JSONVar newStatus);
   void handleClientRequest_(websockets::WebsocketsClient& client, websockets::WebsocketsMessage msg);
 };
 

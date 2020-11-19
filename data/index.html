@@ -96,6 +96,7 @@
         
         commandSocket.onopen = function() {
             window.onbeforeunload = function() {
+                commandSocket.onclose = null;
                 commandSocket.close();
             };
         };

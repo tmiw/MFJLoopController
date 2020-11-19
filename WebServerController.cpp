@@ -1,6 +1,5 @@
 #include <LittleFS.h>
 #include <ESP8266mDNS.h>
-#include <Arduino_JSON.h>
 #include "WebServerController.h"
 #include "CapacitorController.h"
 #include "PowerMonitor.h"
@@ -34,22 +33,28 @@ void WebServerController::setup()
   server_.begin();
 
   socketServer_.listen(81);
+
+  // Generate initial status output.
+  currentStatus_ = generateStatusOutput_();
 }
 
 void WebServerController::process()
 {
   server_.handleClient();
   MDNS.update();
-
+  delay(0); // allow Wi-Fi tasks to execute.
+  
   // Handle new connection attempts over WebSockets.
   if (socketServer_.poll())
   {
     auto client = socketServer_.accept();
     clientList_.push_back(client);
-    sendStatusToClient_(client);
+    client.send(JSON.stringify(currentStatus_));
+    delay(0); // allow Wi-Fi tasks to execute.
   }
 
   // Send current status to existing clients and handle client requests.
+  auto newStatus = generateStatusOutput_();
   auto iter = clientList_.begin();
   while (iter != clientList_.end())
   {
@@ -59,8 +64,9 @@ void WebServerController::process()
         handleClientRequest_(*iter, msg);
       });
       iter->poll(); // Handle inbound messages
-      
-      sendStatusToClient_(*iter); // TODO: we don't need to send the current status every time through the loop.
+
+      sendStatusToClient_(*iter, newStatus);
+      delay(0); // allow Wi-Fi tasks to execute.
       iter++;
     }
     else
@@ -71,6 +77,8 @@ void WebServerController::process()
       clientList_.erase(oldIter);
     }
   }
+
+  currentStatus_ = newStatus;
 }
 
 void WebServerController::handleNotFound_()
@@ -105,19 +113,35 @@ void WebServerController::handleNotFound_()
   }
 }
 
-void WebServerController::sendStatusToClient_(websockets::WebsocketsClient& client)
+JSONVar WebServerController::generateStatusOutput_()
 {
-  // TODO
-  client.send("{ \"command\": \"status\", \"success\": true, "
-              "  \"fwd_power\": " + String(pPowerMonitor_->getForwardPower(), 1) + ", "
-              "  \"rev_power\": " + String(pPowerMonitor_->getReversePower(), 1) + ", "
-              "  \"fwd_power_adc\": " + String(pPowerMonitor_->getForwardPowerADC()) + ", "
-              "  \"rev_power_adc\": " + String(pPowerMonitor_->getReversePowerADC()) + ", "   
-              "  \"vswr\": " + String(pPowerMonitor_->getVSWR(), 2) + ", "   
-              "  \"capacitor_speed\": " + String(pCapacitorController_->getSpeed()) + ", "
-              "  \"capacitor_direction\": " + String(pCapacitorController_->getDirection()) + ","
-              "  \"autotune_state\": " + String(pAutoTuneController_->getState()) + ","
-              "  \"autotune_direction\": " + String(pAutoTuneController_->getDirection()) + "}");
+  JSONVar output;
+  output["command"] = "status";
+  output["success"] = true;
+  output["fwd_power"] = (double)pPowerMonitor_->getForwardPower();
+  output["rev_power"] = (double)pPowerMonitor_->getReversePower();
+  output["fwd_power_adc"] = (int)pPowerMonitor_->getForwardPowerADC();
+  output["rev_power_adc"] = (int)pPowerMonitor_->getReversePowerADC();
+  output["vswr"] = (double)pPowerMonitor_->getVSWR();
+  output["capacitor_speed"] = (int)pCapacitorController_->getSpeed();
+  output["capacitor_direction"] = (int)pCapacitorController_->getDirection();
+  output["autotune_state"] = (int)pAutoTuneController_->getState();
+  output["autotune_direction"] = (int)pAutoTuneController_->getDirection();
+  return output;
+}
+
+void WebServerController::sendStatusToClient_(websockets::WebsocketsClient& client, JSONVar newStatus)
+{
+  /*if ((double)newStatus["fwd_power"] != (double)currentStatus_["fwd_power"] ||
+      (double)newStatus["rev_power"] != (double)currentStatus_["rev_power"] ||
+      (double)newStatus["vswr"] != (double)currentStatus_["vswr"] ||
+      (int)newStatus["capacitor_speed"] != (int)currentStatus_["capacitor_speed"] ||
+      (int)newStatus["capacitor_direction"] != (int)currentStatus_["capacitor_direction"] ||
+      (int)newStatus["autotune_state"] != (int)currentStatus_["autotune_state"] ||
+      (int)newStatus["autotune_direction"] != (int)currentStatus_["autotune_direction"])*/
+  {
+    client.send(JSON.stringify(newStatus));
+  }
 }
 
 void WebServerController::handleClientRequest_(websockets::WebsocketsClient& client, websockets::WebsocketsMessage msg)
