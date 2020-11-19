@@ -132,13 +132,13 @@ JSONVar WebServerController::generateStatusOutput_()
 
 void WebServerController::sendStatusToClient_(websockets::WebsocketsClient& client, JSONVar newStatus)
 {
-  /*if ((double)newStatus["fwd_power"] != (double)currentStatus_["fwd_power"] ||
+  if ((double)newStatus["fwd_power"] != (double)currentStatus_["fwd_power"] ||
       (double)newStatus["rev_power"] != (double)currentStatus_["rev_power"] ||
       (double)newStatus["vswr"] != (double)currentStatus_["vswr"] ||
       (int)newStatus["capacitor_speed"] != (int)currentStatus_["capacitor_speed"] ||
       (int)newStatus["capacitor_direction"] != (int)currentStatus_["capacitor_direction"] ||
       (int)newStatus["autotune_state"] != (int)currentStatus_["autotune_state"] ||
-      (int)newStatus["autotune_direction"] != (int)currentStatus_["autotune_direction"])*/
+      (int)newStatus["autotune_direction"] != (int)currentStatus_["autotune_direction"])
   {
     client.send(JSON.stringify(newStatus));
   }
@@ -306,6 +306,12 @@ void WebServerController::handleClientRequest_(websockets::WebsocketsClient& cli
     output["cap_dir"] = (long)capacitorDirection;
     output["enable"] = enable;
     client.send(JSON.stringify(output));
+    return;
+  }
+  else if (command == "status")
+  {
+    // Send current status.
+    client.send(JSON.stringify(currentStatus_));
     return;
   }
   else

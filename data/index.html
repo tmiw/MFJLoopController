@@ -94,11 +94,21 @@
             initWebSocket();
         };
         
+        commandSocket.onerror = function() {
+            initWebSocket();
+        };
+        
         commandSocket.onopen = function() {
             window.onbeforeunload = function() {
                 commandSocket.onclose = null;
+                commandSocket.onerror = null;
                 commandSocket.close();
             };
+            
+            // Request current status.
+            commandSocket.send(JSON.stringify({
+                "command": "status"
+            }));
         };
     
         commandSocket.onmessage = function(event) {
