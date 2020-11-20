@@ -42,7 +42,7 @@ void WebServerController::process()
 {
   server_.handleClient();
   MDNS.update();
-  delay(0); // allow Wi-Fi tasks to execute.
+  delay(0);
   
   // Handle new connection attempts over WebSockets.
   if (socketServer_.poll())
@@ -50,7 +50,7 @@ void WebServerController::process()
     auto client = socketServer_.accept();
     clientList_.push_back(client);
     client.send(JSON.stringify(currentStatus_));
-    delay(0); // allow Wi-Fi tasks to execute.
+    delay(0);
   }
 
   // Send current status to existing clients and handle client requests.
@@ -66,7 +66,6 @@ void WebServerController::process()
       iter->poll(); // Handle inbound messages
 
       sendStatusToClient_(*iter, newStatus);
-      delay(0); // allow Wi-Fi tasks to execute.
       iter++;
     }
     else
@@ -76,6 +75,7 @@ void WebServerController::process()
       iter++;
       clientList_.erase(oldIter);
     }
+    delay(0);
   }
 
   currentStatus_ = newStatus;

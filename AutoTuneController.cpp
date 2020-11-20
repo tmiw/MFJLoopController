@@ -81,20 +81,20 @@ void AutoTuneController::process()
         pCapacitorController_->setSpeed(getSpeedForCurrentState_());
       }
       
-      if (swr <= getSWRThresholdForCurrentState_() && swr <= minSWRVal_)
-      {
-        minSWRVal_ = swr;
-      }
-      
       if (minSWRVal_ != DBL_MAX)
       {
-        if (swr > minSWRVal_)
+        if (swr >= minSWRVal_)
         {
           pCapacitorController_->forceStop(); // to reduce the amount of distance to cover in slow mode.
           currentState_ = getNextState_();
           minSWRVal_ = DBL_MAX;
           waitTimeBegin_ = 0;
         }
+      }
+
+      if (swr <= getSWRThresholdForCurrentState_() || minSWRVal_ != DBL_MAX)
+      {
+        minSWRVal_ = swr;
       }
       
       break;
@@ -103,11 +103,28 @@ void AutoTuneController::process()
       // Wait state to allow SWR to stabilize after terminating tuning step.
       if (fabs(minSWRVal_ - swr) <= AUTOTUNE_MIN_SWR_DIFF_IN_WAIT)
       {
-        minSWRVal_ = DBL_MAX;
-        currentState_ = getNextState_();
-      }
+        if (waitTimeBegin_ == 0)
+        {
+          waitTimeBegin_ = millis();
+        }
 
-      minSWRVal_ = swr;
+        if ((millis() - waitTimeBegin_) >= MIN_TUNE_WAIT_TIME_MS)
+        {
+          minSWRVal_ = DBL_MAX;
+          if (swr <= MAX_GOOD_SWR_END_TUNING)
+          {
+            currentState_ = IDLE;
+          }
+          else
+          {
+            currentState_ = getNextState_();
+          }
+        }
+      }
+      else
+      {
+        minSWRVal_ = swr;
+      }
       break;
     case IDLE:
     default:

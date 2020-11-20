@@ -43,9 +43,15 @@
 #define AUTOTUNE_BEGIN_TUNE_TIME_MS 2000
 
 // VSWR "tuning complete" threshold (below after which we switch to slow tuning).
-#define FAST_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)3.0)
+#define FAST_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)2.0)
 
 // VSWR "tuning complete" threshold (below after which we stop tuning).
 #define SLOW_AUTOTUNE_COMPLETE_VSWR_THRESH ((double)2.0)
+
+// Minimum wait time between tuning states to ensure capacitor remains stable enough
+#define MIN_TUNE_WAIT_TIME_MS 100
+
+// Maximum "good enough" SWR to exit tuning.
+#define MAX_GOOD_SWR_END_TUNING ((double)1.5)
 
 #endif // CONFIG_H
