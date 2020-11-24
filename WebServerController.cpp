@@ -6,8 +6,8 @@
 #include "AutoTuneController.h"
 #include "config.h"
 
-static const char TEXT_PLAIN[] PROGMEM = "text/plain";
-static const char TEXT_JSON[] PROGMEM = "text/json";
+static const char TEXT_PLAIN[] = "text/plain";
+static const char TEXT_JSON[] = "text/json";
 
 WebServerController::WebServerController(CapacitorController* pCapacitorController, PowerMonitor* pPowerMonitor, AutoTuneController* pAutoTuneController)
 : server_(80)
@@ -24,7 +24,7 @@ WebServerController::~WebServerController()
 }
 
 void WebServerController::setup()
-{
+{  
   if (MDNS.begin(MDNS_NAME)) {
     //Serial.println("MDNS responder started");
   }
@@ -85,31 +85,38 @@ void WebServerController::handleNotFound_()
 {
   // If we're able to find the file on the local FS, send it to the user.
   String path = ESP8266WebServer::urlDecode(server_.uri());
-  if (path.endsWith(F("/")))
+  if (path.endsWith("/"))
   {
-    path += F("index.html");
+    path += "index.html";
   }
-
+  
   if (LittleFS.exists(path))
   {
     File f = LittleFS.open(path, "r");
+
+    // These two settings increase the reliability of the page load for some reason (!)
+    // when sending "large" files (such as index.html). Ideally they wouldn't be needed,
+    // so TBD for future.
+    server_.client().setNoDelay(true);
+    server_.client().setSync(true);
+    
     server_.streamFile(f, mime::getContentType(path));
     f.close();
   }
   else
   {
-    String message = F("File Not Found\n\n");
-    message += F("URI: ");
+    String message = "File Not Found\n\n";
+    message += "URI: ";
     message += path;
-    message += F("\nMethod: ");
-    message += (server_.method() == HTTP_GET) ? F("GET") : F("POST");
-    message += F("\nArguments: ");
+    message += "\nMethod: ";
+    message += (server_.method() == HTTP_GET) ? "GET" : "POST";
+    message += "\nArguments: ";
     message += server_.args();
-    message += F("\n");
+    message += "\n";
     for (uint8_t i = 0; i < server_.args(); i++) {
       message += " " + server_.argName(i) + ": " + server_.arg(i) + F("\n");
     }
-    server_.send(404, F("text/plain"), message);
+    server_.send(404, "text/plain", message);
   }
 }
 

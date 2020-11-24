@@ -13,15 +13,28 @@ PowerMonitor powerMonitor;
 AutoTuneController autoTuneController(&capController, &powerMonitor);
 WebServerController webServerController(&capController, &powerMonitor, &autoTuneController);
 
-void setup() {
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(STASSID, STAPSK);
-
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+void checkWifi()
+{
+  if (WiFi.status() != WL_CONNECTED)
+  {
+    delay(1);
+    
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(STASSID, STAPSK);
+  
+    // Wait for connection
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+    }
   }
+}
 
+void setup() {
+  checkWifi();
+  
+  // FS init
+  LittleFS.begin();
+  
   capController.setup();
   powerMonitor.setup();
   webServerController.setup();
@@ -85,12 +98,12 @@ void setup() {
   });
   ArduinoOTA.begin();
 
-  // FS init
-  LittleFS.begin();
 }
 
 void loop() 
 {
+  checkWifi();
+  
   // Handle OTA
   ArduinoOTA.handle();
 
