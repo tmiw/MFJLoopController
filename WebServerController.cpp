@@ -91,34 +91,8 @@ void WebServerController::handleNotFound_()
   if (LittleFS.exists(path))
   {
     File f = LittleFS.open(path, "r");
-
-    // These two settings increase the reliability of the page load for some reason (!)
-    // when sending "large" files (such as index.html). Ideally they wouldn't be needed,
-    // so TBD for future.
-    server_.client().setNoDelay(true);
-    server_.client().setSync(true);
-
-    int filesize = f.size();
-    String WebString = "";
-    WebString += "HTTP/1.1 200 OK\r\n";
-    WebString += "Content-Type: text/html\r\n";
-    WebString += "Content-Length: " + String(filesize) + "\r\n";
-    WebString += "\r\n";
-    server_.sendContent(WebString);
-  
-    //server_.streamFile(f, mime::getContentType(path));
-    char buf[1024];
-    int siz = f.size();
-    while(siz > 0) {
-      size_t len = std::min((int)(sizeof(buf) - 1), siz);
-      f.read((uint8_t *)buf, len);
-      server_.client().write((const char*)buf, len);
-      siz -= len;
-
-      delay(0);
-    }
+    server_.streamFile(f, mime::getContentType(path));
     f.close();
-    server_.client().stop();
   }
   else
   {
