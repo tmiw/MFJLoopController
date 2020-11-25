@@ -71,9 +71,7 @@ void WebServerController::process()
     else
     {
       iter->close();
-      auto oldIter = iter;
-      iter++;
-      clientList_.erase(oldIter);
+      iter = clientList_.erase(iter);
     }
     delay(0);
   }
