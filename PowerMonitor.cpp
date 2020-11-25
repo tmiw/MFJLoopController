@@ -38,8 +38,14 @@ void PowerMonitor::setup()
 
 void PowerMonitor::process()
 {
-  forwardPowerAdc_ = ads1015_.getAdcValue(0);
-  revPowerAdc_ = ads1015_.getAdcValue(1);      
+  int tempAdc = ads1015_.getAdcValue(0);
+  /*if (forwardPowerAdc_ == 0) */forwardPowerAdc_ = tempAdc;
+  //else forwardPowerAdc_ += (tempAdc - forwardPowerAdc_)/4;
+
+  tempAdc = ads1015_.getAdcValue(1);
+  /*if (revPowerAdc_ == 0)*/ revPowerAdc_ = tempAdc;
+  //else revPowerAdc_ += (tempAdc - revPowerAdc_)/4;  
+      
   forwardPower_ = powerFromAdc_(forwardPowerAdc_);
   revPower_ = powerFromAdc_(revPowerAdc_);
 
