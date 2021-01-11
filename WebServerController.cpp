@@ -97,6 +97,20 @@ void WebServerController::process()
   currentStatus_ = newStatus;
 }
 
+void WebServerController::closeAll()
+{
+  auto iter = clientList_.begin();
+  auto timeIter = lastHeardTime_.begin();
+  auto pongIter = pongWaiting_.begin();
+  while (iter != clientList_.end())
+  {
+    iter->close();
+    iter = clientList_.erase(iter);
+    timeIter = lastHeardTime_.erase(timeIter);
+    pongIter = pongWaiting_.erase(pongIter);
+  }
+}
+
 void WebServerController::handleNotFound_()
 {
   // If we're able to find the file on the local FS, send it to the user.

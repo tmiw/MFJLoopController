@@ -26,6 +26,9 @@ void checkWifi()
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
     }
+
+    // Close all existing connections. If we disconnected, the connections are invalid anyway.
+    webServerController.closeAll();
   }
 }
 

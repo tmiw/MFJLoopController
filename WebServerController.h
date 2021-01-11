@@ -19,6 +19,8 @@ public:
 
   virtual void setup();
   virtual void process();
+
+  void closeAll();
   
 private:
   ESP8266WebServer server_;
