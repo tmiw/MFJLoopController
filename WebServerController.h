@@ -27,6 +27,8 @@ private:
   AutoTuneController* pAutoTuneController_;
   websockets::WebsocketsServer socketServer_;
   std::vector<websockets::WebsocketsClient> clientList_;
+  std::vector<unsigned int> lastHeardTime_;
+  std::vector<bool> pongWaiting_;
   JSONVar currentStatus_;
   
   void handleNotFound_();

@@ -49,6 +49,8 @@ void WebServerController::process()
   {
     auto client = socketServer_.accept();
     clientList_.push_back(client);
+    lastHeardTime_.push_back(millis());
+    pongWaiting_.push_back(false);
     client.send(JSON.stringify(currentStatus_));
     delay(0);
   }
@@ -56,22 +58,38 @@ void WebServerController::process()
   // Send current status to existing clients and handle client requests.
   auto newStatus = generateStatusOutput_();
   auto iter = clientList_.begin();
+  auto timeIter = lastHeardTime_.begin();
+  auto pongIter = pongWaiting_.begin();
   while (iter != clientList_.end())
   {
-    if (iter->available())
+    bool sendPing = !*pongIter && (millis() - *timeIter) >= 30000;
+    bool disconnect = *pongIter && (millis() - *timeIter) >= 40000; // Give client 10s to respond
+    if (!disconnect && iter->available(sendPing))
     {
       iter->onMessage([&](websockets::WebsocketsMessage msg) {
+        *timeIter = millis();
         handleClientRequest_(*iter, msg);
+      });
+      iter->onEvent([&](websockets::WebsocketsEvent evt, websockets::WSInterfaceString str) {
+        if (evt == websockets::WebsocketsEvent::GotPong)
+        {
+          *timeIter = millis();
+          *pongIter = false;
+        }
       });
       iter->poll(); // Handle inbound messages
 
       sendStatusToClient_(*iter, newStatus);
       iter++;
+      timeIter++;
+      pongIter++;
     }
     else
     {
       iter->close();
       iter = clientList_.erase(iter);
+      timeIter = lastHeardTime_.erase(timeIter);
+      pongIter = pongWaiting_.erase(pongIter);
     }
     delay(0);
   }
