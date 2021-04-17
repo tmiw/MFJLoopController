@@ -90,18 +90,21 @@
 <script language="javascript">
     var initWebSocket = function() {
         commandSocket = new WebSocket("ws://" + window.location.hostname + ":81/");
-        commandSocket.onclose = function() {
-            initWebSocket();
-        };
-        
-        commandSocket.onerror = function() {
-            initWebSocket();
-        };
         
         commandSocket.onopen = function() {
             window.onbeforeunload = function() {
                 commandSocket.onclose = null;
                 commandSocket.onerror = null;
+                commandSocket.close();
+            };
+            
+            commandSocket.onclose = function(e) {
+                console.log('Socket is closed. Reconnect will be attempted in 1 second.', e.reason);
+                setTimeout(initWebSocket, 1000);
+            };
+        
+            commandSocket.onerror = function(e) {
+                console.error('Socket encountered error: ', e.message, 'Closing socket');
                 commandSocket.close();
             };
             
