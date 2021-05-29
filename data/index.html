@@ -88,6 +88,30 @@
     </div>
 </body>
 <script language="javascript">
+    var oneShot = false;
+    var oneShotDirection = "";
+    var oneShotSpeed = "";
+    
+    var enable_manual_tune = function(dir, speed) {
+        oneShot = true;
+        oneShotDirection = dir;
+        oneShotSpeed = speed;
+        commandSocket.send(JSON.stringify({
+            "command": "manual_tune",
+            "direction": dir,
+            "speed": speed,
+            "enable": true
+        }));
+    };
+    
+    var disable_manual_tune = function() {
+        oneShot = false;
+        commandSocket.send(JSON.stringify({
+            "command": "manual_tune",
+            "enable": false
+        }));
+    };
+    
     var initWebSocket = function() {
         commandSocket = new WebSocket("ws://" + window.location.hostname + ":81/");
         
@@ -137,74 +161,84 @@
                 $("#rev_power_adc").text(rev_power_adc);
                 $("#vswr").text(vswr);
         
-                // Set button states.
-                $("#fast-down").removeClass("btn-success");
-                $("#fast-up").removeClass("btn-success");
-                $("#fast-down").addClass("btn-primary");
-                $("#fast-up").addClass("btn-primary");
-                $("#slow-down").removeClass("btn-success");
-                $("#slow-up").removeClass("btn-success");
-                $("#slow-down").addClass("btn-primary");
-                $("#slow-up").addClass("btn-primary");
-                $("#at-down").removeClass("btn-success");
-                $("#at-up").removeClass("btn-success");
-                $("#at-down").removeClass("btn-warning");
-                $("#at-up").removeClass("btn-warning");
-                $("#at-down").addClass("btn-primary");
-                $("#at-up").addClass("btn-primary");
-                if (capacitor_speed == "1")
+                // If manual tune is active and it just finished pulsing,
+                // resend the command to do another pulse.
+                var oneShotFromServer = xhr.one_shot;
+                if (oneShot && !oneShotFromServer)
                 {
-                    if (capacitor_direction == "2")
-                    {
-                        $("#fast-up").removeClass("btn-primary");
-                        $("#fast-up").addClass("btn-success");
-                    }
-                    else if (capacitor_direction == "1")
-                    {
-                        $("#fast-down").removeClass("btn-primary");
-                        $("#fast-down").addClass("btn-success");
-                    }
+                    enable_manual_tune(oneShotDirection, oneShotSpeed);
                 }
-                else if (capacitor_speed == "2" || capacitor_speed == "3")
-                {
-                    if (capacitor_direction == "2")
+                else
+                    {                
+                    // Set button states.
+                    $("#fast-down").removeClass("btn-success");
+                    $("#fast-up").removeClass("btn-success");
+                    $("#fast-down").addClass("btn-primary");
+                    $("#fast-up").addClass("btn-primary");
+                    $("#slow-down").removeClass("btn-success");
+                    $("#slow-up").removeClass("btn-success");
+                    $("#slow-down").addClass("btn-primary");
+                    $("#slow-up").addClass("btn-primary");
+                    $("#at-down").removeClass("btn-success");
+                    $("#at-up").removeClass("btn-success");
+                    $("#at-down").removeClass("btn-warning");
+                    $("#at-up").removeClass("btn-warning");
+                    $("#at-down").addClass("btn-primary");
+                    $("#at-up").addClass("btn-primary");
+                    if (capacitor_speed == "1")
                     {
-                        $("#slow-up").removeClass("btn-primary");
-                        $("#slow-up").addClass("btn-success");
+                        if (capacitor_direction == "2")
+                        {
+                            $("#fast-up").removeClass("btn-primary");
+                            $("#fast-up").addClass("btn-success");
+                        }
+                        else if (capacitor_direction == "1")
+                        {
+                            $("#fast-down").removeClass("btn-primary");
+                            $("#fast-down").addClass("btn-success");
+                        }
                     }
-                    else if (capacitor_direction == "1")
+                    else if (capacitor_speed == "2" || capacitor_speed == "3")
                     {
-                        $("#slow-down").removeClass("btn-primary");
-                        $("#slow-down").addClass("btn-success");
+                        if (capacitor_direction == "2")
+                        {
+                            $("#slow-up").removeClass("btn-primary");
+                            $("#slow-up").addClass("btn-success");
+                        }
+                        else if (capacitor_direction == "1")
+                        {
+                            $("#slow-down").removeClass("btn-primary");
+                            $("#slow-down").addClass("btn-success");
+                        }
                     }
-                }
     
-                if (autotune_state == "1" || autotune_state == "2")
-                {
-                    // Fast autotune
-                    if (autotune_direction == "1")
+                    if (autotune_state == "1" || autotune_state == "2")
                     {
-                        $("#at-down").removeClass("btn-primary");
-                        $("#at-down").addClass("btn-success");
+                        // Fast autotune
+                        if (autotune_direction == "1")
+                        {
+                            $("#at-down").removeClass("btn-primary");
+                            $("#at-down").addClass("btn-success");
+                        }
+                        else if (autotune_direction == "2")
+                        {
+                            $("#at-up").removeClass("btn-primary");
+                            $("#at-up").addClass("btn-success");
+                        }
                     }
-                    else if (autotune_direction == "2")
+                    else if (autotune_state == "3" || autotune_state == "4")
                     {
-                        $("#at-up").removeClass("btn-primary");
-                        $("#at-up").addClass("btn-success");
-                    }
-                }
-                else if (autotune_state == "3" || autotune_state == "4")
-                {
-                    // Slow autotune
-                    if (autotune_direction == "1")
-                    {
-                        $("#at-down").removeClass("btn-primary");
-                        $("#at-down").addClass("btn-warning");
-                    }
-                    else if (autotune_direction == "2")
-                    {
-                        $("#at-up").removeClass("btn-primary");
-                        $("#at-up").addClass("btn-warning");
+                        // Slow autotune
+                        if (autotune_direction == "1")
+                        {
+                            $("#at-down").removeClass("btn-primary");
+                            $("#at-down").addClass("btn-warning");
+                        }
+                        else if (autotune_direction == "2")
+                        {
+                            $("#at-up").removeClass("btn-primary");
+                            $("#at-up").addClass("btn-warning");
+                        }
                     }
                 }
             }
@@ -213,78 +247,46 @@
     
     $(document).ready(function () {
         initWebSocket();
-            
+        
         // Initialize button actions.
         $("#slow-up").mousedown(function() {
             //$("#slow-up").removeClass("btn-primary");
             //$("#slow-up").addClass("btn-success");
-            commandSocket.send(JSON.stringify({
-                "command": "manual_tune",
-                "direction": "up",
-                "speed": "slow",
-                "enable": true
-            }));
+            enable_manual_tune("up", "slow");
         });
         
         $("#slow-up").mouseup(function() {
             //$("#slow-up").addClass("btn-primary");
             //$("#slow-up").removeClass("btn-success");
-            commandSocket.send(JSON.stringify({
-                "command": "manual_tune",
-                "enable": false
-            }));
+            disable_manual_tune();
         });
         
         $("#slow-down").mousedown(function() {
             //$("#slow-down").removeClass("btn-primary");
             //$("#slow-down").addClass("btn-success");
-            commandSocket.send(JSON.stringify({
-                "command": "manual_tune",
-                "direction": "down",
-                "speed": "slow",
-                "enable": true
-            }));
+            enable_manual_tune("down", "slow");
         });
         
         $("#slow-down").mouseup(function() {
             //$("#slow-down").addClass("btn-primary");
             //$("#slow-down").removeClass("btn-success");
-            commandSocket.send(JSON.stringify({
-                "command": "manual_tune",
-                "enable": false
-            }));
+            disable_manual_tune();
         });
         
         $("#fast-up").mousedown(function() {
-            commandSocket.send(JSON.stringify({
-                "command": "manual_tune",
-                "direction": "up",
-                "speed": "fast",
-                "enable": true
-            }));
+            enable_manual_tune("up", "fast");
         });
         
         $("#fast-up").mouseup(function() {
-            commandSocket.send(JSON.stringify({
-                "command": "manual_tune",
-                "enable": false
-            }));
+            disable_manual_tune();
         });
         
         $("#fast-down").mousedown(function() {
-            commandSocket.send(JSON.stringify({
-                "command": "manual_tune",
-                "direction": "down",
-                "speed": "fast",
-                "enable": true
-            }));
+            enable_manual_tune("down", "fast");
         });
         
         $("#fast-down").mouseup(function() {
-            commandSocket.send(JSON.stringify({
-                "command": "manual_tune",
-                "enable": false
-            }));
+            disable_manual_tune();
         });
         
         $("#at-up").click(function() {

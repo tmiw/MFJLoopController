@@ -17,6 +17,8 @@ public:
   Direction getDirection() const;
   void setSpeed(Speed speed);
   Speed getSpeed() const;
+  void setOneShot(bool oneShot);
+  bool getOneShot() const;
   virtual void process();
   virtual void setup();
 
@@ -31,6 +33,7 @@ private:
   int pwmPin_;
   int pwmHighTimeMs_;
   int pwmLowTimeMs_;
+  bool oneShot_;
   unsigned long pwmStateStartTime_;
   
   void enableTuningPin_();

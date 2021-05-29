@@ -47,7 +47,18 @@ void WebServerController::process()
   // Handle new connection attempts over WebSockets.
   if (socketServer_.poll())
   {
-    auto client = socketServer_.accept();
+    auto iter = clientList_.begin();
+    auto timeIter = lastHeardTime_.begin();
+    auto pongIter = pongWaiting_.begin();
+    while (iter != clientList_.end())
+    {
+      iter->close();
+      iter = clientList_.erase(iter);
+      timeIter = lastHeardTime_.erase(timeIter);
+      pongIter = pongWaiting_.erase(pongIter);
+    }
+    
+    auto client = socketServer_.accept();    
     clientList_.push_back(client);
     lastHeardTime_.push_back(millis());
     pongWaiting_.push_back(false);
@@ -68,6 +79,7 @@ void WebServerController::process()
     {
       iter->onMessage([&](websockets::WebsocketsMessage msg) {
         *timeIter = millis();
+        *pongIter = false;
         handleClientRequest_(*iter, msg);
       });
       iter->onEvent([&](websockets::WebsocketsEvent evt, websockets::WSInterfaceString str) {
@@ -157,6 +169,7 @@ JSONVar WebServerController::generateStatusOutput_()
   output["capacitor_direction"] = (int)pCapacitorController_->getDirection();
   output["autotune_state"] = (int)pAutoTuneController_->getState();
   output["autotune_direction"] = (int)pAutoTuneController_->getDirection();
+  output["one_shot"] = pCapacitorController_->getOneShot();
   return output;
 }
 
@@ -168,7 +181,8 @@ void WebServerController::sendStatusToClient_(websockets::WebsocketsClient& clie
       (int)newStatus["capacitor_speed"] != (int)currentStatus_["capacitor_speed"] ||
       (int)newStatus["capacitor_direction"] != (int)currentStatus_["capacitor_direction"] ||
       (int)newStatus["autotune_state"] != (int)currentStatus_["autotune_state"] ||
-      (int)newStatus["autotune_direction"] != (int)currentStatus_["autotune_direction"])
+      (int)newStatus["autotune_direction"] != (int)currentStatus_["autotune_direction"] ||
+      (int)newStatus["one_shot"] != (int)currentStatus_["one_shot"])
   {
     client.send(JSON.stringify(newStatus));
   }
@@ -325,6 +339,7 @@ void WebServerController::handleClientRequest_(websockets::WebsocketsClient& cli
     {
       pCapacitorController_->setDirection(capacitorDirection);
       pCapacitorController_->setSpeed(capacitorSpeed);
+      pCapacitorController_->setOneShot(true);
     }
         
     // Return success response.

@@ -54,6 +54,16 @@ CapacitorController::Speed CapacitorController::getSpeed() const
   return speed_;
 }
 
+bool CapacitorController::getOneShot() const
+{
+  return oneShot_;
+}
+
+void CapacitorController::setOneShot(bool val)
+{
+  oneShot_ = true;
+}
+
 void CapacitorController::process()
 {
   // Set next PWM state.
@@ -108,8 +118,15 @@ void CapacitorController::process()
         if ((currentTime - pwmStateStartTime_) >= pwmLowTimeMs_)
         {
           disableTuningPins_();
-          pwmState_ = PWM_HIGH;
+          pwmState_ = oneShot_ ? DISABLED : PWM_HIGH;
           pwmStateStartTime_ = 0; // Will reset to the current time on next loop
+
+          if (oneShot_) 
+          {
+            oneShot_ = false;
+            setSpeed(IDLE);
+            setDirection(NONE);
+          }
         }
         break;
     }
